@@ -4,84 +4,67 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class Teleporter1 : MonoBehaviour
 {
+    [Header("Destination")]
     public Transform targetTeleportLocation;
+
+    [Header("FX (optional)")]
     public GameObject effectPrefab;
     public AudioClip teleportSound;
+
+    [Header("Portal View (optional)")]
+    public Camera portalCamera;     // camera that renders to the portal screen
+    public Renderer portalScreen;   // mesh renderer of the quad
+
+    [Header("Tuning")]
+    [Range(0f,1f)] public float minApproachDot = 0.25f; // require front-side entry
+    public float cooldown = 0.25f;
+
     private AudioSource audioSource;
-    private ActionBasedContinuousMoveProvider moveProvider;
-    public GameObject[] objectsToDisableDuringTeleport;
+    private ActionBasedContinuousMoveProvider moveProvider; // may be null in debug
+    private bool busy;
 
-    public Camera portalCamera; // Camera at the destination
-    public Renderer portalScreen; // Screen to display the portal view
-
-    private void Start()
+    void Start()
     {
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
+        audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
 
-        // Set up the portal camera render texture
-        if (portalCamera != null && portalScreen != null)
+        if (portalCamera && portalScreen)
         {
-            RenderTexture portalTexture = new RenderTexture(Screen.width, Screen.height, 24);
-            portalCamera.targetTexture = portalTexture;
-            portalScreen.material.mainTexture = portalTexture;
+            var rt = new RenderTexture(Screen.width, Screen.height, 24);
+            portalCamera.targetTexture = rt;
+            portalScreen.material.mainTexture = rt;
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
-        {
-            // Find the ActionBasedContinuousMoveProvider on the XR Rig
-            moveProvider = other.GetComponentInParent<ActionBasedContinuousMoveProvider>();
+        var root = other.transform.root;
+        if (!root.CompareTag("Player")) return;
 
-            if (moveProvider != null)
-            {
-                StartCoroutine(TeleportPlayer(other.gameObject));
-            }
-        }
+        Vector3 playerToPortal = (transform.position - root.position).normalized;
+        float dot = Vector3.Dot(transform.forward, playerToPortal);
+        if (dot < minApproachDot || busy) return;
+
+        moveProvider = root.GetComponentInParent<ActionBasedContinuousMoveProvider>();
+        StartCoroutine(TeleportPlayer(root.gameObject));
     }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     private IEnumerator TeleportPlayer(GameObject player)
     {
-        // Disable specified GameObjects
-        foreach (var obj in objectsToDisableDuringTeleport)
-        {
-            if (obj != null)
-                obj.SetActive(false);
-        }
+        busy = true;
 
-        // Disable movement
-        if (moveProvider != null) moveProvider.enabled = false;
+        if (moveProvider) moveProvider.enabled = false;
+        if (effectPrefab) Instantiate(effectPrefab, player.transform.position, Quaternion.identity);
+        if (teleportSound) audioSource.PlayOneShot(teleportSound);
 
-        // Play the teleport effect and sound
-        if (effectPrefab != null)
-        {
-            Instantiate(effectPrefab, player.transform.position, Quaternion.identity);
-        }
-        if (teleportSound != null)
-        {
-            audioSource.PlayOneShot(teleportSound);
-        }
+        if (targetTeleportLocation)
+            player.transform.SetPositionAndRotation(targetTeleportLocation.position, targetTeleportLocation.rotation);
+        else
+            Debug.LogWarning("[Portal] No targetTeleportLocation set.");
 
-        // Teleport the player to the target location
-        player.transform.position = targetTeleportLocation.position;
-        player.transform.rotation = targetTeleportLocation.rotation;
+        yield return new WaitForSeconds(cooldown);
 
-        // Wait for a frame to ensure the player is in the correct position
-        yield return null;
-
-        // Re-enable specified GameObjects
-        foreach (var obj in objectsToDisableDuringTeleport)
-        {
-            if (obj != null)
-                obj.SetActive(true);
-        }
-
-        // Re-enable movement
-        if (moveProvider != null) moveProvider.enabled = true;
+        if (moveProvider) moveProvider.enabled = true;
+        busy = false;
     }
 }
