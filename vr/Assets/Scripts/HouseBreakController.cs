@@ -4,7 +4,7 @@ using UnityEngine;
 public class HouseBreakController : MonoBehaviour
 {
     public BreakablePart[] parts;
-    public float baseExplosionForce = 100f;
+    public float baseExplosionForce = 10f;
     public Transform tornadoRoot;      // optionally point to tornado position
     public float breakDelay = 0f;
 
@@ -20,8 +20,8 @@ public class HouseBreakController : MonoBehaviour
         foreach(var part in parts)
         {
             var joint = part.GetComponent<Joint>();
-            joint.breakForce = 50;
-            joint.breakTorque = 50;
+            joint.breakForce = 100;
+            joint.breakTorque = 100;
         }
         StartCoroutine(BreakRoutine());
     }
