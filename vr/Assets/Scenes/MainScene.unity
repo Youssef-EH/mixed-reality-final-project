@@ -233,6 +233,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6232745470614056090, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_Height
+      value: 1.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 6232745470614056090, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_Center.y
+      value: 0.9
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -431,7 +439,7 @@ MonoBehaviour:
   head: {fileID: 1630178531}
   animator: {fileID: 1800489938}
   heightOffset: -1.7
-  forwardOffset: 0
+  forwardOffset: -0.5
   speedParam: Speed
   walkThreshold: 0.1
 --- !u!1001 &839198747
@@ -720,7 +728,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6691ecc05c3d14e4ca3b09efd97db0a0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.13
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6691ecc05c3d14e4ca3b09efd97db0a0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -785,6 +793,14 @@ PrefabInstance:
     - target: {fileID: 2291208041558531591, guid: 6691ecc05c3d14e4ca3b09efd97db0a0, type: 3}
       propertyPath: m_LocalRotation.z
       value: -0.04992819
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 6691ecc05c3d14e4ca3b09efd97db0a0, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 8a9068dfc091842d7973f5340cf22312, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 6691ecc05c3d14e4ca3b09efd97db0a0, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
