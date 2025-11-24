@@ -438,8 +438,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   head: {fileID: 1630178531}
   animator: {fileID: 1800489938}
-  heightOffset: -1.7
+  heightOffset: 1.8
   forwardOffset: 0
+  footOffset: 0
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   speedParam: Speed
   walkThreshold: 0.1
 --- !u!1001 &839198747
