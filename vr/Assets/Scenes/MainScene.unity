@@ -439,7 +439,7 @@ MonoBehaviour:
   head: {fileID: 1630178531}
   animator: {fileID: 1800489938}
   heightOffset: -1.7
-  forwardOffset: -0.5
+  forwardOffset: 0
   speedParam: Speed
   walkThreshold: 0.1
 --- !u!1001 &839198747
@@ -728,7 +728,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6691ecc05c3d14e4ca3b09efd97db0a0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0.3
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6691ecc05c3d14e4ca3b09efd97db0a0, type: 3}
       propertyPath: m_LocalRotation.w
