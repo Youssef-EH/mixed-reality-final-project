@@ -30,29 +30,34 @@ public class VRBodyFollower : MonoBehaviour
         if (head == null) return;
 
         // 1. Position body under the head (with offset)
-        var headPos = head.position;
-        var bodyPos = headPos;
+        Vector3 headPos = head.position;
+        Vector3 bodyPos = headPos;
 
-        bodyPos.y += heightOffset;
-        bodyPos += head.forward * forwardOffset;
+        // FLATTEN forward so Y = 0 (no vertical movement from looking up/down)
+        Vector3 flatForward = new Vector3(head.forward.x, 0f, head.forward.z);
+        if (flatForward.sqrMagnitude > 0.0001f)
+            flatForward.Normalize();
+
+        bodyPos.y += heightOffset;                 // drop to feet
+        bodyPos += flatForward * forwardOffset;    // use FLAT forward here
 
         transform.position = bodyPos;
 
-        // 2. Rotate only with head yaw (no pitch/roll)
-        var flatForward = new Vector3(head.forward.x, 0f, head.forward.z);
+        // 2. Rotate only with head yaw (same flatForward)
         if (flatForward.sqrMagnitude > 0.0001f)
         {
             transform.rotation = Quaternion.LookRotation(flatForward, Vector3.up);
         }
 
-        // 3. Drive animation based on horizontal speed
-        var flat = new Vector3(transform.position.x, 0f, transform.position.z);
+        // 3. Drive animation based on horizontal speed (can stay as you had it)
         if (animator != null && animator.runtimeAnimatorController != null)
         {
-            var speed = (flat - lastPos).magnitude / Mathf.Max(Time.deltaTime, 0.0001f);
+            Vector3 flat = new Vector3(transform.position.x, 0f, transform.position.z);
+            float speed = (flat - lastPos).magnitude / Mathf.Max(Time.deltaTime, 0.0001f);
             animator.SetFloat(speedParam, speed);
 
             lastPos = flat;
         }
     }
+
 }
