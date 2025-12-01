@@ -1,0 +1,210 @@
+=====================================
+BRANCH PULL TROUBLESHOOTING GUIDE
+=====================================
+
+ISSUES FOUND IN YOUR SETUP:
+----------------------------
+
+1. ❌ DOUBLE COLLIDER ISSUE (CRITICAL!)
+   Problem: Your Branch01 has TWO colliders:
+   - Capsule Collider on Branch01 (parent)
+   - Capsule Collider on Branch01/Capsule (child)
+   
+   This can cause interaction problems!
+   
+   SOLUTION:
+   → Remove the Capsule Collider from the CHILD "Capsule" GameObject
+   → Keep ONLY the collider on the parent "Branch01"
+   → The visual mesh can stay, just remove its collider
+
+2. ⚠️ GRAB DETECTION
+   Your XR Rig uses Near-Far Interactors with XR Interaction Groups.
+   These should work, but let's verify interaction layers match.
+
+3. ⚠️ MOVEMENT TYPE
+   Your XRGrabInteractable is set to "Kinematic"
+   SimpleBranch expects to track position changes while grabbed.
+   This should work, but might need adjustment.
+
+
+STEP-BY-STEP FIX:
+-----------------
+
+FIX 1: Remove Duplicate Collider
+1. Select "/Tree01B/Branch01/Capsule" in Hierarchy
+2. In Inspector, find the "Capsule Collider" component
+3. Right-click on "Capsule Collider" → Remove Component
+4. The visual mesh renderer should stay
+
+FIX 2: Verify Interaction Layers
+1. Select "/Tree01B/Branch01" in Hierarchy
+2. In XR Grab Interactable component, check "Interaction Layers"
+3. Should show "Default" (Layer 0) with value 1
+4. This matches your controllers (also Layer 0)
+5. ✓ If they match, this is OK
+
+FIX 3: Add Debug Script (Temporarily)
+1. Select "/Tree01B/Branch01"
+2. Add Component → Branch Debugger
+3. Enter Play Mode
+4. Watch Console for debug messages:
+   - "HOVER ENTERED" = controller is detecting the branch
+   - "GRABBED!" = successfully grabbed
+   - "Pull Speed: X" = shows your pull force
+
+FIX 4: Adjust Pull Settings
+If you CAN grab but CAN'T detach:
+1. Select "/Tree01B/Branch01"
+2. Find "SimpleBranch" component
+3. Lower "Pull Strength Required" from 30 to 10
+4. Lower "Detach Delay" from 0.3 to 0.1
+5. Test again
+
+FIX 5: Check XR Device Simulator Settings
+If testing in Editor:
+1. Make sure "XR Device Simulator" is active
+2. Press these keys:
+   - Right Mouse Button + Move Mouse = Move controller
+   - Right Click + Drag = Grab
+   - Pull mouse away while holding = Pull branch
+
+
+TESTING CHECKLIST:
+------------------
+
+□ Can you see the branch in the scene?
+□ Can you move the XR controller near it?
+□ Does the controller highlight/hover over branch?
+□ Can you press Grip button to grab?
+□ While grabbed, can you move the controller?
+□ Does console show "GRABBED!" message?
+□ Does console show "Pull Speed" messages?
+□ Does branch detach when pulling fast enough?
+
+
+DIAGNOSTIC QUESTIONS:
+---------------------
+
+Q1: Can you grab the branch at all?
+    NO → Interaction layer or collider issue
+    YES → Continue to Q2
+
+Q2: When grabbed, can you move it around?
+    NO → Check XR Grab Interactable movement type
+    YES → Continue to Q3
+
+Q3: Does it detach when you pull?
+    NO → Pull strength too high or pull speed too low
+    YES → Success! Adjust settings to preference
+
+
+COMMON FIXES:
+-------------
+
+Issue: Can't grab branch
+Fix 1: Remove duplicate colliders (see FIX 1)
+Fix 2: Make sure branch is on layer that controllers can interact with
+Fix 3: Verify XR Grab Interactable is enabled
+
+Issue: Can grab but can't detach
+Fix 1: Lower Pull Strength Required to 5-10 for testing
+Fix 2: Try holding and quickly jerking controller away
+Fix 3: Check SimpleBranch script is enabled
+Fix 4: Verify Rigidbody starts as kinematic
+
+Issue: Detaches immediately when grabbed
+Fix 1: Increase Pull Strength Required
+Fix 2: Increase Detach Delay
+Fix 3: Check for physics conflicts
+
+Issue: No hover/highlight on branch
+Fix 1: Check interaction layers match
+Fix 2: Verify collider exists on branch
+Fix 3: Make sure branch is active in hierarchy
+
+
+XR DEVICE SIMULATOR CONTROLS:
+------------------------------
+
+Keyboard/Mouse Controls:
+- Tab = Switch between left/right controller
+- Right Mouse Button = Activate controller
+- Right Click + Move Mouse = Move controller
+- Ctrl + Right Mouse = Grab (Select/Grip)
+- Shift = Move faster
+
+If using Device Simulator in Play Mode:
+1. Look at the branch
+2. Tab to switch to right hand
+3. Hold Right Mouse and move near branch
+4. Hold Ctrl + Right Mouse to grab
+5. While holding, move mouse away quickly
+6. Should detach when pull is strong enough
+
+
+EXPECTED BEHAVIOR:
+------------------
+
+1. Move controller near branch → Branch should highlight
+2. Press Grip button → Branch is grabbed
+3. Console shows: "[BranchDebugger] ✓ GRABBED!"
+4. Move controller while holding → Branch follows
+5. Console shows: "[BranchDebugger] Pull Speed: X"
+6. Pull fast enough → Console shows pull speed > 30
+7. After 0.3 seconds of fast pulling → Branch detaches
+8. Console shows: "Branch Branch01 detached from tree!"
+9. Branch falls with physics enabled
+
+
+ADVANCED DEBUGGING:
+-------------------
+
+If still not working, check these:
+
+1. Console Errors
+   → Look for any red error messages
+   → Check for missing component warnings
+
+2. XR Interaction Manager
+   → Should be on "XR Origin (XR Rig)"
+   → Auto-created by XR Interaction Toolkit
+
+3. Input Actions
+   → XRI Default Input Actions should be enabled
+   → Check in Input System window
+
+4. Physics Settings
+   → Project Settings → Physics
+   → Verify gravity is -9.81
+   → Check collision matrix
+
+5. Branch Position
+   → Make sure branch is near XR Origin
+   → Not too far away to reach
+   → Position it at around Y=1.5 (standing height)
+
+
+QUICK TEST VALUES:
+------------------
+
+For easy testing, set SimpleBranch to:
+- Pull Strength Required: 5
+- Detach Delay: 0.05
+- Mass: 0.3
+- Drag After Detach: 0.5
+
+This makes it VERY easy to pull off.
+Once working, increase values for realistic feel.
+
+
+NEED MORE HELP?
+---------------
+
+1. Add BranchDebugger script to branch
+2. Enable "Show Debug Logs"
+3. Enter Play Mode
+4. Copy console messages
+5. Check what stage is failing:
+   - No "HOVER" = Interaction layer issue
+   - No "GRABBED" = Input or grab issue  
+   - "GRABBED" but no detach = Pull settings issue
