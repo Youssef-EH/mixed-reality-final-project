@@ -8,8 +8,8 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 public class BranchPullInteraction : MonoBehaviour
 {
     [Header("Pull Settings")]
-    [SerializeField] private float pullForceThreshold = 50f;
-    [SerializeField] private float pullDuration = 0.5f;
+    [SerializeField] private float pullForceThreshold;
+    [SerializeField] private float pullDuration;
     [SerializeField] private bool destroyJointOnDetach = true;
 
     [Header("Detached Settings")]
@@ -40,7 +40,10 @@ public class BranchPullInteraction : MonoBehaviour
     {
         grabInteractable = GetComponent<XRGrabInteractable>();
         branchRigidbody = GetComponent<Rigidbody>();
-        
+
+        grabInteractable.trackPosition = false;
+        grabInteractable.trackRotation = false;
+
         branchRigidbody.isKinematic = true;
         branchRigidbody.mass = detachedMass;
 
@@ -135,6 +138,9 @@ public class BranchPullInteraction : MonoBehaviour
         branchRigidbody.linearDamping = detachedLinearDamping;
         branchRigidbody.AddForce(pullDirection * pullForceThreshold * 0.5f, ForceMode.Impulse);
         branchRigidbody.AddTorque(Random.onUnitSphere * breakTorque, ForceMode.Impulse);
+
+        grabInteractable.trackPosition = true;
+        grabInteractable.trackRotation = true;
 
         if (detachSound != null && audioSource != null)
         {
