@@ -1,0 +1,195 @@
+===================================
+BRANCH PULLING SETUP GUIDE
+===================================
+
+This guide will help you set up interactive branches that users can pull from the tree in VR.
+
+OVERVIEW:
+---------
+Three scripts have been created:
+1. SimpleBranch.cs - Simple pull-to-detach branch (RECOMMENDED FOR QUICK SETUP)
+2. BranchPullInteraction.cs - Advanced pull detection with force threshold
+3. TreeBranchManager.cs - Manages multiple branches on a tree
+
+===================================
+QUICK SETUP (Recommended)
+===================================
+
+STEP 1: CREATE BRANCH GAMEOBJECTS
+----------------------------------
+Since the tree is a single mesh, you need to create separate branch objects:
+
+A. In the Hierarchy, select your Tree01B object
+B. Create empty child GameObjects to represent branches:
+   - Right-click Tree01B → Create Empty
+   - Name it "Branch_01" (repeat for each branch you want)
+   - Position these where branches would be on the tree
+
+C. For visual representation (optional):
+   - Add a Cylinder or Capsule as a child of each Branch GameObject
+   - Scale and rotate to look like a branch
+   - OR import/create branch mesh models
+
+
+STEP 2: ADD COMPONENTS TO EACH BRANCH
+--------------------------------------
+For EACH branch GameObject (Branch_01, Branch_02, etc.):
+
+1. Add XR Grab Interactable:
+   - Select the branch GameObject
+   - Add Component → XR Grab Interactable
+   - Set "Movement Type" to "Kinematic" (initially)
+   - Enable "Throw On Detach"
+
+2. Add Rigidbody:
+   - Add Component → Rigidbody
+   - Check "Is Kinematic" (will be unchecked when detached)
+   - Set Mass to 0.3
+
+3. Add Collider (for grabbing):
+   - Add Component → Capsule Collider
+   - Adjust size to match your branch
+   - Set Direction to Y-axis
+   - Radius: ~0.05, Height: ~0.3 (adjust as needed)
+
+4. Add SimpleBranch Script:
+   - Add Component → Simple Branch
+   - Adjust settings:
+     * Pull Strength Required: 30 (higher = harder to pull)
+     * Detach Delay: 0.3 seconds
+     * Mass: 0.3
+
+
+STEP 3: SETUP INTERACTION LAYERS (Important!)
+----------------------------------------------
+Make sure your XR Rig can interact with branches:
+
+1. Select your XR Rig's controllers (left/right hand)
+2. Find the XR Direct Interactor or XR Ray Interactor components
+3. In "Interaction Layer Mask", ensure it includes the layer your branches are on
+
+
+STEP 4: TEST IN VR
+------------------
+1. Enter Play Mode
+2. Grab a branch with your VR controller
+3. Pull away from the tree - after the delay and with enough force, it should detach
+4. Once detached, you can throw it or drop it
+
+
+===================================
+ADVANCED SETUP (BranchPullInteraction)
+===================================
+
+If you want more control over pull force detection:
+
+1. Use BranchPullInteraction.cs instead of SimpleBranch.cs
+2. Setup is similar, but offers:
+   - Pull Force Threshold (force needed to detach)
+   - Pull Duration (how long you must pull)
+   - Audio on detach
+   - Joint-based attachment
+
+Settings:
+- Pull Force Threshold: 50 (adjust sensitivity)
+- Pull Duration: 0.5 seconds
+- Detached Mass: 0.5
+- Optional: Add AudioSource and assign detach sound
+
+
+===================================
+USING TREE BRANCH MANAGER
+===================================
+
+If you want to spawn branches dynamically:
+
+STEP 1: Create Branch Prefab
+-----------------------------
+1. Create a branch GameObject as described above
+2. Add all components (XRGrabInteractable, Rigidbody, Collider, SimpleBranch)
+3. Drag it to Project window to create a prefab
+4. Delete from scene
+
+STEP 2: Setup Spawn Points
+---------------------------
+1. Select Tree01B
+2. Create empty child objects where branches should spawn
+3. Name them clearly (BranchSpawnPoint_01, etc.)
+
+STEP 3: Add Manager
+-------------------
+1. Select Tree01B
+2. Add Component → Tree Branch Manager
+3. Assign your branch prefab to "Branch Prefab"
+4. Add spawn point transforms to "Branch Spawn Points" list
+5. Adjust collider settings if needed
+
+
+===================================
+TROUBLESHOOTING
+===================================
+
+Issue: Can't grab branches
+Solution: 
+- Check Interaction Layers match between Interactor and Interactable
+- Ensure branch has a Collider component
+- Verify XR Grab Interactable is enabled
+
+Issue: Branch detaches immediately
+Solution:
+- Increase "Pull Strength Required" or "Pull Force Threshold"
+- Increase "Detach Delay"
+
+Issue: Branch never detaches
+Solution:
+- Decrease pull threshold values
+- Check that Rigidbody starts as kinematic
+- Verify SimpleBranch script is enabled
+
+Issue: Branch floats away
+Solution:
+- Adjust Rigidbody mass (higher = falls faster)
+- Increase "Drag After Detach" in SimpleBranch
+
+Issue: Performance issues with many branches
+Solution:
+- Reduce number of active branches
+- Use simpler colliders
+- Disable branches that are far from player
+
+
+===================================
+CUSTOMIZATION IDEAS
+===================================
+
+1. Add particle effects when branch detaches (leaves, wood chips)
+2. Play sound effects (snap, rustle)
+3. Add score/counting system for collected branches
+4. Regenerate branches after a delay
+5. Different branch types with different pull requirements
+6. Damage system - branches get weaker over time
+
+
+===================================
+SCRIPT REFERENCES
+===================================
+
+SimpleBranch.cs
+- Best for: Quick setup, simple pull detection
+- Pull detection based on speed and distance
+- Minimal configuration needed
+
+BranchPullInteraction.cs
+- Best for: Fine-tuned force feedback
+- Physics-based pull detection
+- Supports audio feedback
+- More realistic feel
+
+TreeBranchManager.cs
+- Best for: Managing multiple branches
+- Dynamic branch spawning
+- Centralized branch configuration
+
+
+For more help, check Unity XR Interaction Toolkit documentation:
+https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@3.2/manual/index.html

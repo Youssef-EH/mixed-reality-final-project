@@ -1,0 +1,246 @@
+=====================================
+BRANCH SETUP VISUAL DIAGRAM
+=====================================
+
+CURRENT SETUP (HAS ISSUES):
+---------------------------
+
+Tree01B
+├── Branch01                           ← XRGrabInteractable + SimpleBranch + Rigidbody
+│   ├── Transform
+│   ├── Rigidbody (kinematic)
+│   ├── XRGrabInteractable
+│   ├── CapsuleCollider ✓             ← KEEP THIS ONE
+│   ├── SimpleBranch
+│   └── [Child]
+│       └── Capsule                    ← Visual mesh
+│           ├── MeshFilter
+│           ├── MeshRenderer
+│           └── CapsuleCollider ❌     ← REMOVE THIS ONE!
+
+
+CORRECT SETUP (FIXED):
+----------------------
+
+Tree01B
+├── Branch01                           ← All interactive components here
+│   ├── Transform
+│   ├── Rigidbody (kinematic=true, mass=0.3)
+│   ├── XRGrabInteractable (movementType=Kinematic)
+│   ├── CapsuleCollider ✓             ← ONLY collider (for grabbing)
+│   ├── SimpleBranch (pullStrength=30, delay=0.3)
+│   └── BranchDebugger (optional)     ← For testing
+│   └── [Child]
+│       └── Capsule (or any mesh)     ← Just visuals
+│           ├── MeshFilter
+│           └── MeshRenderer
+│           └── NO COLLIDER!           ← Important!
+
+
+WHY DOUBLE COLLIDERS CAUSE PROBLEMS:
+-------------------------------------
+
+When you have colliders on both parent and child:
+
+1. Physics engine gets confused about which to use
+2. XR Interaction system may grab the child instead
+3. SimpleBranch tracks parent, but child might be moving
+4. Pull detection becomes unreliable
+
+
+COMPONENT RESPONSIBILITIES:
+----------------------------
+
+XRGrabInteractable
+├── Makes object grabbable by XR controllers
+├── Handles select/deselect events
+├── Manages movement while grabbed
+└── Requires: Rigidbody + Collider
+
+Rigidbody
+├── Provides physics simulation
+├── Starts kinematic (attached to tree)
+├── Becomes dynamic when detached
+└── Controls mass, drag, gravity
+
+CapsuleCollider (parent only!)
+├── Defines grab area
+├── Must be on same GameObject as XRGrabInteractable
+├── Used for interaction raycasts
+└── Should roughly match visual size
+
+SimpleBranch
+├── Monitors grab state
+├── Calculates pull speed
+├── Detects when to break off
+├── Enables physics on detach
+└── Requires: XRGrabInteractable + Rigidbody
+
+Child Mesh (Capsule)
+├── ONLY visual representation
+├── MeshFilter + MeshRenderer
+└── NO interactive components!
+
+
+INTERACTION FLOW:
+-----------------
+
+1. Controller approaches branch
+   XRGrabInteractable → Detects collider → Hover
+
+2. Player presses Grip
+   XRGrabInteractable → selectEntered → SimpleBranch.OnBranchGrabbed()
+
+3. Player moves controller while gripping
+   XRGrabInteractable → Moves transform → SimpleBranch tracks position
+
+4. SimpleBranch checks pull speed
+   SimpleBranch.FixedUpdate() → Calculates distance/time → Speed
+
+5. Pull speed exceeds threshold
+   SimpleBranch → DetachFromTree() → Rigidbody.isKinematic = false
+
+6. Branch falls with physics
+   Rigidbody → Applies forces → GameObject moves freely
+
+
+LAYER SETUP:
+------------
+
+Branch01:
+- Layer: Default (0)
+- Interaction Layer: Default (0) ← Must match!
+
+XR Controllers:
+- Layer: Default (0)
+- Interaction Layer: Default (0) ← Must match!
+
+Both must be on matching interaction layers to work!
+
+
+SIZE RECOMMENDATIONS:
+---------------------
+
+Branch Collider (CapsuleCollider):
+├── Radius: 0.05 to 0.1 (5-10cm)
+├── Height: 0.2 to 0.5 (20-50cm)
+├── Direction: Y-axis (1)
+└── Center: (0, 0, 0)
+
+Visual Mesh Scale:
+├── Should match or be slightly smaller
+├── Example: Scale (0.05, 0.3, 0.05)
+└── Looks like a stick/branch
+
+
+TESTING POSITIONS:
+------------------
+
+Good branch placement:
+- Y position: 1.0 to 1.8 (waist to head height)
+- Close to tree trunk
+- Within reach of player (0.5-2m from XR Origin)
+
+Bad branch placement:
+- Too high (Y > 2.5)
+- Too low (Y < 0.5)
+- Too far from origin (> 5m)
+- Inside tree collision
+
+
+PULL DETECTION EXPLANATION:
+----------------------------
+
+SimpleBranch measures pull by:
+
+1. Stores position when grabbed
+2. Each FixedUpdate (physics tick):
+   - Measures distance moved
+   - Calculates speed = distance / time
+3. If speed > pullStrengthRequired:
+   - AND time > detachDelay
+   - THEN detach!
+
+Example:
+- Pull Strength = 30
+- Player moves 0.15m in 0.02s (one frame)
+- Speed = 0.15 / 0.02 = 7.5 units/sec
+- 7.5 < 30 = Not enough, keep attached
+
+- Player yanks 0.8m in 0.02s
+- Speed = 0.8 / 0.02 = 40 units/sec
+- 40 > 30 = Detach! ✓
+
+
+MOVEMENT TYPE EXPLAINED:
+-------------------------
+
+XRGrabInteractable Movement Types:
+
+1. Kinematic (Your current setting)
+   - Rigidbody stays kinematic while grabbed
+   - Transform moves directly
+   - SimpleBranch can track position ✓
+   - Good for: Precision control
+
+2. Instantaneous
+   - Rigidbody becomes non-kinematic
+   - Position set directly each frame
+   - Can track movement ✓
+   - Good for: Responsive feel
+
+3. Velocity Tracking
+   - Uses physics forces to follow
+   - Smoother but less precise
+   - Harder to track exact movement
+   - Better for: Heavy objects
+
+For branches: Kinematic or Instantaneous works best!
+
+
+COMPLETE COMPONENT CHECKLIST:
+------------------------------
+
+Branch01 GameObject must have:
+✓ Transform
+✓ Rigidbody
+  - Is Kinematic: Checked
+  - Mass: 0.3
+  - Use Gravity: Checked
+  - Collision Detection: Discrete
+✓ Collider (Capsule or Box)
+  - Is Trigger: Unchecked
+  - Proper size for grabbing
+✓ XR Grab Interactable
+  - Movement Type: Kinematic
+  - Track Position: Checked
+  - Track Rotation: Checked
+  - Throw On Detach: Checked
+  - Interaction Layers: Default
+✓ Simple Branch
+  - Pull Strength Required: 10-30
+  - Detach Delay: 0.1-0.3
+  - Mass: 0.3
+✓ (Optional) Branch Debugger
+  - Show Debug Logs: Checked
+
+Child GameObject (visual) should have:
+✓ MeshFilter
+✓ MeshRenderer
+✗ NO Collider
+✗ NO Rigidbody
+✗ NO interaction components
+
+
+QUICK FIX CHECKLIST:
+--------------------
+
+□ Remove collider from child "Capsule" GameObject
+□ Keep collider only on parent "Branch01"
+□ Verify Branch01 has SimpleBranch script
+□ Lower Pull Strength to 10 for testing
+□ Add BranchDebugger for console feedback
+□ Test in Play Mode with XR Device Simulator
+□ Watch console for "GRABBED!" message
+□ Pull quickly and watch for "Pull Speed" logs
+□ Adjust Pull Strength after confirming it works
