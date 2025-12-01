@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
 
 public class RainController : MonoBehaviour
 {
@@ -41,7 +42,7 @@ public class RainController : MonoBehaviour
     private float currentIntensity = 0f;
     private ParticleSystem.EmissionModule emissionModule;
     private ColorAdjustments colorAdjustments;
-
+    public Image overlay;
     private void Start()
     {
         if (rainParticleSystem == null)
@@ -116,7 +117,7 @@ public class RainController : MonoBehaviour
             return;
         }
 
-        float targetIntensity = isRaining ? 1f : 0f;
+        float targetIntensity = isRaining ? 2f : 0f;
         float duration = isRaining ? rampUpDuration : rampDownDuration;
 
         currentIntensity = Mathf.MoveTowards(currentIntensity, targetIntensity, Time.deltaTime / duration);
@@ -139,7 +140,9 @@ public class RainController : MonoBehaviour
 
         if (colorAdjustments != null)
         {
-            colorAdjustments.postExposure.value = Mathf.Lerp(0f, rainyExposure, currentIntensity);
+            overlay.color = new Color(0f, 0f, 0f, Mathf.Lerp(0f, 0.7f, currentIntensity));
+
+            //colorAdjustments.postExposure.value = Mathf.Lerp(0f, rainyExposure, currentIntensity);
         }
     }
 }
