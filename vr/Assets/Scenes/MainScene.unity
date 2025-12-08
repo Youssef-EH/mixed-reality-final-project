@@ -819,6 +819,52 @@ MonoBehaviour:
   head: {fileID: 1630178531}
   drinkDistance: 0.7
   drinkCooldown: 2
+--- !u!1 &821494792
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 821494794}
+  - component: {fileID: 821494793}
+  m_Layer: 0
+  m_Name: CursorManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &821494793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 821494792}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 867e9b8e6ef1b40a59357b41c0d50575, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unlockKey: 8
+  lockKey: 13
+--- !u!4 &821494794
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 821494792}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.056846235, y: 0.449252, z: 2.3109918}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &839198747
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1210,3 +1256,4 @@ SceneRoots:
   - {fileID: 297218517}
   - {fileID: 839198747}
   - {fileID: 806557562}
+  - {fileID: 821494794}
