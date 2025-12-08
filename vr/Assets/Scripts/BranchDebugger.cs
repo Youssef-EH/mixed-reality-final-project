@@ -10,15 +10,16 @@ public class BranchDebugger : MonoBehaviour
     [SerializeField] private float gizmoSize = 0.1f;
 
     private XRGrabInteractable grabInteractable;
-    private SimpleBranch simpleBranch;
+    private BranchPullInteraction branchPull;
     private Rigidbody rb;
     private Vector3 lastPosition;
+    private Vector3 attachmentPosition;
     private bool wasGrabbed = false;
 
     private void Awake()
     {
         grabInteractable = GetComponent<XRGrabInteractable>();
-        simpleBranch = GetComponent<SimpleBranch>();
+        branchPull = GetComponent<BranchPullInteraction>();
         rb = GetComponent<Rigidbody>();
     }
 
@@ -67,8 +68,13 @@ public class BranchDebugger : MonoBehaviour
         
         if (showDebugLogs)
         {
-            Debug.Log($"[BranchDebugger] ✓ GRABBED! - Interactor: {args.interactorObject.transform.name}");
-            Debug.Log($"[BranchDebugger] - SimpleBranch Pull Strength Required: {(simpleBranch != null ? simpleBranch.pullStrengthRequired.ToString() : "N/A")}");
+            Debug.Log($"[BranchDebugger] GRABBED - Interactor: {args.interactorObject.transform.name}");
+            if (branchPull != null)
+            {
+                Debug.Log($"[BranchDebugger] - Pull Threshold: {branchPull.PullForceThreshold}m");
+                Debug.Log($"[BranchDebugger] - Pull Duration: {branchPull.PullDuration}s");
+                Debug.Log($"[BranchDebugger] - Is Attached: {branchPull.IsAttached}");
+            }
             Debug.Log($"[BranchDebugger] - Rigidbody IsKinematic: {rb.isKinematic}");
         }
     }
@@ -87,16 +93,12 @@ public class BranchDebugger : MonoBehaviour
     {
         if (!wasGrabbed || !grabInteractable.isSelected) return;
 
-        Vector3 currentPos = transform.position;
-        float pullDistance = Vector3.Distance(currentPos, lastPosition);
-        float pullSpeed = pullDistance / Time.deltaTime;
-
-        if (showDebugLogs && pullDistance > 0.001f)
+        if (branchPull != null && branchPull.IsAttached)
         {
-            Debug.Log($"[BranchDebugger] Pull Speed: {pullSpeed:F2} (Required: {(simpleBranch != null ? simpleBranch.pullStrengthRequired : 0)})");
+            attachmentPosition = transform.position - (transform.position - lastPosition).normalized * 0.1f;
         }
 
-        lastPosition = currentPos;
+        lastPosition = transform.position;
     }
 
     private void OnDrawGizmos()
@@ -115,10 +117,13 @@ public class BranchDebugger : MonoBehaviour
             }
         }
 
-        if (wasGrabbed)
+        if (wasGrabbed && branchPull != null && branchPull.IsAttached)
         {
             Gizmos.color = Color.cyan;
-            Gizmos.DrawLine(lastPosition, transform.position);
+            Gizmos.DrawLine(attachmentPosition, transform.position);
+            
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(attachmentPosition, 0.05f);
         }
     }
 }
