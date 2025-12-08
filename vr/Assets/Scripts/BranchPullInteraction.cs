@@ -8,9 +8,12 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 public class BranchPullInteraction : MonoBehaviour
 {
     [Header("Pull Settings")]
-    [SerializeField] private float pullForceThreshold;
-    [SerializeField] private float pullDuration;
+    [SerializeField] private float pullForceThreshold = 0.2f;
+    [SerializeField] private float pullDuration = 2f;
     [SerializeField] private bool destroyJointOnDetach = true;
+    [SerializeField] private float grabStartDelay = 0.1f;
+    [SerializeField] private float jointSpring = 500f;
+    [SerializeField] private float jointDamper = 50f;
 
     [Header("Detached Settings")]
     [SerializeField] private float detachedMass = 0.5f;
@@ -30,22 +33,31 @@ public class BranchPullInteraction : MonoBehaviour
 
     private XRGrabInteractable grabInteractable;
     private Rigidbody branchRigidbody;
-    private FixedJoint attachmentJoint;
+    private ConfigurableJoint attachmentJoint;
     private bool _isAttached = true;
     private float pullStartTime;
+    private float grabTime;
     private Vector3 lastPosition;
+    private Vector3 jointAnchorWorldPos;
+    private Vector3 grabAnchorPos;
     private IXRSelectInteractor currentInteractor;
+    private bool isPulling;
+    private bool hasSetGrabAnchor;
 
     private void Awake()
     {
         grabInteractable = GetComponent<XRGrabInteractable>();
         branchRigidbody = GetComponent<Rigidbody>();
 
-        grabInteractable.trackPosition = false;
-        grabInteractable.trackRotation = false;
+        grabInteractable.trackPosition = true;
+        grabInteractable.trackRotation = true;
+        grabInteractable.movementType = XRBaseInteractable.MovementType.VelocityTracking;
+        grabInteractable.retainTransformParent = false;
+        grabInteractable.smoothPosition = false;
+        grabInteractable.smoothRotation = false;
 
-        branchRigidbody.isKinematic = true;
         branchRigidbody.mass = detachedMass;
+        branchRigidbody.linearDamping = detachedLinearDamping;
 
         if (audioSource == null)
         {
@@ -75,8 +87,11 @@ public class BranchPullInteraction : MonoBehaviour
         }
 
         currentInteractor = args.interactorObject;
+        grabTime = Time.time;
         pullStartTime = Time.time;
         lastPosition = transform.position;
+        isPulling = false;
+        hasSetGrabAnchor = false;
 
         if (showDebugLogs)
         {
@@ -88,6 +103,8 @@ public class BranchPullInteraction : MonoBehaviour
     private void OnReleased(SelectExitEventArgs args)
     {
         currentInteractor = null;
+        isPulling = false;
+        hasSetGrabAnchor = false;
         
         if (showDebugLogs && _isAttached)
         {
@@ -97,25 +114,64 @@ public class BranchPullInteraction : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!_isAttached || currentInteractor == null) return;
+        if (!_isAttached || currentInteractor == null || attachmentJoint == null) return;
+
+        float timeSinceGrab = Time.time - grabTime;
+        
+        if (timeSinceGrab < grabStartDelay) return;
+
+        if (!hasSetGrabAnchor)
+        {
+            grabAnchorPos = transform.position;
+            hasSetGrabAnchor = true;
+            
+            if (showDebugLogs)
+            {
+                Debug.Log($"<color=green>[BranchPull] Grab anchor set at: {grabAnchorPos}</color>");
+            }
+        }
 
         Vector3 currentPosition = transform.position;
-        Vector3 pullDirection = currentPosition - lastPosition;
-        float pullForce = pullDirection.magnitude / Time.fixedDeltaTime;
+        Vector3 pullDirection = currentPosition - grabAnchorPos;
+        float pullDistance = pullDirection.magnitude;
 
-        float timePulling = Time.time - pullStartTime;
-
-        if (showDebugLogs && pullForce > 1f)
+        if (pullDistance > pullForceThreshold)
         {
-            Debug.Log($"[BranchPull] Pull force: {pullForce:F1} (need {pullForceThreshold}) | Time: {timePulling:F2}s (need {pullDuration}s)");
-        }
+            if (!isPulling)
+            {
+                isPulling = true;
+                pullStartTime = Time.time;
+                
+                if (showDebugLogs)
+                {
+                    Debug.Log($"<color=yellow>[BranchPull] Started pulling! Distance: {pullDistance:F3}m (threshold: {pullForceThreshold}m)</color>");
+                }
+            }
+            
+            float pullingTime = Time.time - pullStartTime;
+            
+            if (showDebugLogs && Time.frameCount % 30 == 0)
+            {
+                Debug.Log($"[BranchPull] Pull distance: {pullDistance:F3}m (need {pullForceThreshold}m) | Time: {pullingTime:F2}s (need {pullDuration}s)");
+            }
 
-        if (pullForce > pullForceThreshold && timePulling > pullDuration)
+            if (pullingTime >= pullDuration)
+            {
+                DetachBranch(pullDirection.normalized);
+            }
+        }
+        else
         {
-            DetachBranch(pullDirection.normalized);
+            if (isPulling)
+            {
+                isPulling = false;
+                
+                if (showDebugLogs)
+                {
+                    Debug.Log($"<color=cyan>[BranchPull] Pull released - distance dropped to {pullDistance:F3}m</color>");
+                }
+            }
         }
-
-        lastPosition = currentPosition;
     }
 
     private void DetachBranch(Vector3 pullDirection)
@@ -135,6 +191,7 @@ public class BranchPullInteraction : MonoBehaviour
         }
 
         branchRigidbody.isKinematic = false;
+        branchRigidbody.useGravity = true;
         branchRigidbody.linearDamping = detachedLinearDamping;
         branchRigidbody.AddForce(pullDirection * pullForceThreshold * 0.5f, ForceMode.Impulse);
         branchRigidbody.AddTorque(Random.onUnitSphere * breakTorque, ForceMode.Impulse);
@@ -156,7 +213,7 @@ public class BranchPullInteraction : MonoBehaviour
         
         if (attachmentJoint == null)
         {
-            attachmentJoint = gameObject.AddComponent<FixedJoint>();
+            attachmentJoint = gameObject.AddComponent<ConfigurableJoint>();
         }
         
         Rigidbody parentRb = parentTransform.GetComponent<Rigidbody>();
@@ -165,16 +222,43 @@ public class BranchPullInteraction : MonoBehaviour
             attachmentJoint.connectedBody = parentRb;
         }
         
+        attachmentJoint.xMotion = ConfigurableJointMotion.Limited;
+        attachmentJoint.yMotion = ConfigurableJointMotion.Limited;
+        attachmentJoint.zMotion = ConfigurableJointMotion.Limited;
+        
+        SoftJointLimit linearLimit = new SoftJointLimit();
+        linearLimit.limit = pullForceThreshold * 2f;
+        linearLimit.bounciness = 0f;
+        linearLimit.contactDistance = 0f;
+        attachmentJoint.linearLimit = linearLimit;
+        
+        SoftJointLimitSpring linearSpring = new SoftJointLimitSpring();
+        linearSpring.spring = jointSpring;
+        linearSpring.damper = jointDamper;
+        attachmentJoint.linearLimitSpring = linearSpring;
+        
+        attachmentJoint.angularXMotion = ConfigurableJointMotion.Locked;
+        attachmentJoint.angularYMotion = ConfigurableJointMotion.Locked;
+        attachmentJoint.angularZMotion = ConfigurableJointMotion.Locked;
+        
         attachmentJoint.breakForce = Mathf.Infinity;
         attachmentJoint.breakTorque = Mathf.Infinity;
+        attachmentJoint.enableCollision = false;
+        attachmentJoint.enablePreprocessing = true;
+
+        branchRigidbody.isKinematic = false;
+        branchRigidbody.useGravity = false;
+        branchRigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
         _isAttached = true;
-        branchRigidbody.isKinematic = true;
+        jointAnchorWorldPos = transform.position;
 
         if (showDebugLogs)
         {
-            Debug.Log($"<color=green>[BranchPull] ✓ Branch attached to '{parentTransform.name}' with FixedJoint</color>");
+            Debug.Log($"<color=green>[BranchPull] ✓ Branch attached to '{parentTransform.name}' with ConfigurableJoint</color>");
             Debug.Log($"<color=green>[BranchPull] ✓ Joint connected: {attachmentJoint.connectedBody != null}</color>");
+            Debug.Log($"<color=green>[BranchPull] ✓ Joint anchor position: {jointAnchorWorldPos}</color>");
+            Debug.Log($"<color=green>[BranchPull] ✓ Spring: {jointSpring}, Damper: {jointDamper}</color>");
         }
     }
 }
