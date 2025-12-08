@@ -1,0 +1,98 @@
+=====================================
+XR INTERACTION TOOLKIT 3.x API NOTES
+=====================================
+
+IMPORTANT: XR Interaction Toolkit 3.x changed several API names from version 2.x
+
+FIXED COMPILATION ERRORS:
+-------------------------
+
+1. Event Arguments Changed
+   OLD (v2.x): InteractableSelectEnterEventArgs
+   NEW (v3.x): SelectEnterEventArgs
+   
+   OLD (v2.x): InteractableSelectExitEventArgs  
+   NEW (v3.x): SelectExitEventArgs
+
+2. Required Using Statements
+   For XR Interaction Toolkit 3.x, you need:
+   
+   using UnityEngine.XR.Interaction.Toolkit;
+   using UnityEngine.XR.Interaction.Toolkit.Interactables;
+   using UnityEngine.XR.Interaction.Toolkit.Interactors;
+
+3. Event Handler Signatures
+   
+   CORRECT:
+   private void OnGrabbed(SelectEnterEventArgs args)
+   {
+       // Your code
+   }
+   
+   INCORRECT:
+   private void OnGrabbed(InteractableSelectEnterEventArgs args)
+   {
+       // Your code
+   }
+
+
+UNITY 6 PHYSICS API CHANGES:
+-----------------------------
+
+Unity 6 renamed several Rigidbody properties:
+
+1. Damping Properties
+   OLD: rb.drag
+   NEW: rb.linearDamping
+   
+   OLD: rb.angularDrag
+   NEW: rb.angularDamping
+
+2. Velocity Properties
+   OLD: rb.velocity
+   NEW: rb.linearVelocity
+   
+   (angularVelocity remains the same)
+
+3. These are already correctly implemented in the branch scripts!
+
+
+FILES THAT WERE FIXED:
+----------------------
+✓ SimpleBranch.cs
+✓ BranchPullVisualizer.cs
+✓ BranchPullInteraction.cs (was already correct)
+✓ TreeBranchManager.cs (no XR events used)
+✓ QuickBranchSetup.cs (no XR events used)
+
+
+VERIFICATION:
+-------------
+All scripts should now compile without errors.
+
+To verify:
+1. Check Unity Console - should have no compilation errors
+2. All scripts should show up in "Add Component" menu
+3. You should be able to attach scripts to GameObjects
+
+
+TROUBLESHOOTING:
+----------------
+
+If you still see errors about "InteractableSelectEnterEventArgs":
+→ Make sure you saved all files
+→ Right-click in Unity Project window → Reimport All
+→ Check that XR Interaction Toolkit package is version 3.x
+
+If you see errors about "linearDamping":
+→ Verify you're using Unity 6.x (not Unity 2021/2022)
+→ Update to latest Unity 6 if needed
+
+
+ADDITIONAL RESOURCES:
+---------------------
+XR Interaction Toolkit 3.2 Migration Guide:
+https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@3.2/manual/migration-guide.html
+
+Unity 6 Physics Changes:
+https://docs.unity3d.com/6000.0/Documentation/Manual/rigidbody-component-properties.html
