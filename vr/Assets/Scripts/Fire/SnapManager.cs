@@ -1,16 +1,25 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 
 public class SnapManager : MonoBehaviour
 {
-    public SnapPoint[] snapPoints;
-    public bool allFilled;   // Will become true when all snap points are filled
+    public bool allFilled;
+    [HideInInspector]
+    public List<SnapPoint> snapPoints = new List<SnapPoint>();
 
+    public void RegisterSnapPoint(SnapPoint sp)
+    {
+        if (!snapPoints.Contains(sp))
+            snapPoints.Add(sp);
+    }
     public void CheckSnapPoints()
     {
+        int number = 0;
         foreach (SnapPoint sp in snapPoints)
         {
-            if (!sp.isFilled)
+            number++;
+            if (!sp.isFilled && number<=3)
             {
                 allFilled = false;
                 return;

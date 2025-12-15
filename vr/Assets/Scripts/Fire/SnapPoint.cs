@@ -1,6 +1,3 @@
-using Unity.VRTemplate;
-using UnityEngine;
-using UnityEngine;
 using UnityEngine;
 
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
@@ -15,6 +12,11 @@ public class SnapPoint : MonoBehaviour
 
     private void Awake()
     {
+        if (manager == null)
+            manager = FindFirstObjectByType<SnapManager>();
+        if (manager != null)
+            manager.RegisterSnapPoint(this);
+
         if (snapPosition == null)
         {
             snapPosition = transform.GetChild(0); // first child
@@ -27,11 +29,11 @@ public class SnapPoint : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isFilled)
-            return; 
         XRGrabInteractable grab = other.GetComponentInParent<XRGrabInteractable>();
         if (grab == null || grab.GetComponent<SnapMarker>() != null)
             return;
+        if (isFilled)
+            return; 
 
         if (!other.CompareTag(targetTag))
             return;
@@ -56,6 +58,11 @@ public class SnapPoint : MonoBehaviour
             Debug.LogError($"{name}: snapPosition is not assigned! Assign a child transform in the inspector.");
             return;
         }
+        if (grab.GetComponent<SnapMarker>() != null)
+            return;
+        // Prevent multiple snaps in the same frame
+        if (grab.gameObject.TryGetComponent<SnapMarker>(out _))
+            return;
         grab.gameObject.AddComponent<SnapMarker>();
         // Disable grabbing
         grab.enabled = false;
@@ -77,8 +84,10 @@ public class SnapPoint : MonoBehaviour
 
         // Mark as filled
         isFilled = true;
+        GetComponent<Collider>().enabled = false;
         print("filled");
         // Notify manager
+        print(manager);
         if (manager != null)
             manager.CheckSnapPoints();
     }
