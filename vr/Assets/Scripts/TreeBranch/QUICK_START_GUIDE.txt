@@ -1,0 +1,153 @@
+========================================
+VR BRANCH PULL - QUICK START GUIDE
+========================================
+
+NEW CLEAN IMPLEMENTATION CREATED!
+Location: /Assets/Scripts/TreeBranch/
+
+STEP-BY-STEP SETUP:
+==================
+
+1. SELECT THE BRANCH GAMEOBJECT
+   - In Hierarchy, navigate to: Tree01B > Branch01
+   - Click on Branch01 to select it
+
+2. REMOVE OLD SCRIPTS
+   - In the Inspector, find these components:
+     ✗ BranchDebugger
+     ✗ BranchPullInteraction  
+     ✗ BranchJointSetup
+   
+   - Click the three dots (⋮) on each component
+   - Select "Remove Component"
+   - Repeat for all three old scripts
+
+3. UPDATE RIGIDBODY SETTINGS
+   Current settings on Branch01:
+   - Mass: 0.3
+   - Is Kinematic: TRUE ← Change this to FALSE
+   - Use Gravity: TRUE ← Change this to FALSE
+   - Collision Detection: Discrete ← Change to Continuous
+   
+   The script will manage gravity and physics after detaching.
+
+4. UPDATE XRGRABINTERACTABLE SETTINGS
+   Current settings on Branch01:
+   - Movement Type: Kinematic ← The script will change this, keep as is
+   - Track Position: TRUE ✓
+   - Track Rotation: TRUE ✓
+   - Retain Transform Parent: TRUE ← Change to FALSE
+   
+   This ensures the branch can be pulled away from the tree.
+
+5. ADD THE NEW SCRIPT
+   - With Branch01 selected
+   - Click "Add Component" button
+   - Type "VRBranchPull"
+   - Click on it to add
+
+6. CONFIGURE VR BRANCH PULL
+   Recommended starting values:
+   
+   PULL SETTINGS:
+   - Pull Distance Threshold: 0.15
+   - Pull Time Required: 1.5
+   - Max Stretch Distance: 0.3
+   
+   PHYSICS:
+   - Joint Spring Strength: 500
+   - Joint Damping: 50
+   - Detach Force: 5
+   
+   AUDIO:
+   - Snap Sound: (Optional - drag audio clip)
+   - Detach Sound: (Optional - drag audio clip)
+   
+   DEBUG:
+   - Enable Debug Logs: ✓ (ON for testing)
+   - Show Gizmos: ✓ (ON to see visual aids)
+
+7. OPTIONAL: ADD VISUAL FEEDBACK
+   - Click "Add Component"
+   - Type "BranchVisualFeedback"
+   - Configure colors and effects as desired
+
+8. TEST IT!
+   - Enter Play Mode (or deploy to VR headset)
+   - Grab the branch with your controller
+   - Pull it away from the tree
+   - Hold stretched for 1.5 seconds
+   - Watch it break free!
+
+WHAT HAPPENS:
+=============
+1. When you grab the branch, it starts tracking your hand
+2. The joint keeps it connected to the tree but allows pulling
+3. Pull it far enough (0.15m) and hold for 1.5 seconds
+4. The branch breaks free with realistic physics
+5. Gravity kicks in and you can throw it around
+
+TESTING TIPS:
+============
+- Watch the Scene view with "Show Gizmos" ON
+  • Yellow sphere = minimum pull distance
+  • Red sphere = maximum stretch distance
+  • Green/Red line = current pull state
+
+- Check the Console for debug messages
+  • Shows when pulling starts
+  • Shows pull progress
+  • Shows when branch detaches
+
+TROUBLESHOOTING:
+===============
+❌ Branch won't grab?
+   → Make sure XRGrabInteractable is enabled
+   → Check collider is not set to "Is Trigger"
+
+❌ Branch detaches immediately?
+   → Increase Pull Distance Threshold
+   → Increase Pull Time Required
+
+❌ Branch won't detach?
+   → Decrease Pull Distance Threshold
+   → Decrease Pull Time Required
+   → Check Console logs for pull progress
+
+❌ Branch feels too stretchy/stiff?
+   → Adjust Joint Spring Strength
+   → Higher = stiffer, Lower = stretchier
+
+❌ Error about parent?
+   → Make sure Branch01 is a child of Tree01B in hierarchy
+
+TUNING FOR YOUR NEEDS:
+=====================
+Easy Mode (casual gameplay):
+- Pull Distance Threshold: 0.1
+- Pull Time Required: 1.0
+
+Normal Mode (balanced):
+- Pull Distance Threshold: 0.15
+- Pull Time Required: 1.5
+
+Hard Mode (realistic):
+- Pull Distance Threshold: 0.2
+- Pull Time Required: 2.5
+
+FILES CREATED:
+=============
+✓ VRBranchPull.cs - Main pulling script
+✓ BranchVisualFeedback.cs - Optional visual effects
+✓ README.txt - Detailed documentation
+✓ QUICK_START_GUIDE.txt - This file
+
+NEXT STEPS:
+==========
+- Test and tune the pull settings
+- Add audio clips for realistic sounds
+- Add particle effects when branch breaks
+- Create more branches with same setup
+- Adjust physics values to your liking
+
+Need help? Check the debug logs in Console!
