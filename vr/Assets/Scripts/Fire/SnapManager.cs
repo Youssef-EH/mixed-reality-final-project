@@ -5,6 +5,7 @@ using UnityEngine;
 public class SnapManager : MonoBehaviour
 {
     public bool allFilled;
+    public GameObject fire;
     [HideInInspector]
     public List<SnapPoint> snapPoints = new List<SnapPoint>();
 
@@ -27,6 +28,7 @@ public class SnapManager : MonoBehaviour
         }
 
         allFilled = true;
+        fire.SetActive(true);
         Debug.Log("All branches snapped! allFilled = TRUE");
     }
 }
