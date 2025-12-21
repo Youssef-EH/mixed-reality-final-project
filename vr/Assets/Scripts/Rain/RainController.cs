@@ -1,13 +1,28 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
+using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.UI;
 
 public class RainController : MonoBehaviour
 {
+    private Exposure autoExposure;
+    private ColorAdjustments colorAdjustments;
+    private Fog fog;
     [Header("Rain Settings")]
     public ParticleSystem rainParticleSystem;
+
+    [Header("Skybox Settings")]
+    public Color normalSkyTint = new Color(0.5f, 0.7f, 1f);
+    public Color rainySkyTint = new Color(0.5f, 0.5f, 0.5f);
+
+    public Color normalGroundColor = new Color(0.369f, 0.349f, 0.341f);
+    public Color rainyGroundColor = new Color(0.2f, 0.2f, 0.2f);
+
+    public float normalSkyExposure = 1.3f;
+    public float rainySkyExposure = 0.7f;
+
+    private Material skyboxMaterial;
 
     [Header("Progression Settings")]
     [Tooltip("Minimum emission rate when rain starts")]
@@ -40,11 +55,24 @@ public class RainController : MonoBehaviour
 
     private bool isRaining = false;
     private float currentIntensity = 0f;
-    private ParticleSystem.EmissionModule emissionModule;
-    private ColorAdjustments colorAdjustments;
     public Image overlay;
     private void Start()
     {
+        if (globalVolume != null && globalVolume.profile != null)
+        {
+            globalVolume.profile.TryGet(out autoExposure);
+            globalVolume.profile.TryGet(out colorAdjustments);
+            globalVolume.profile.TryGet(out fog);
+
+            if (autoExposure != null) autoExposure.active = true;
+            if (colorAdjustments != null) colorAdjustments.active = true;
+            if (fog != null) fog.active = true;
+        }
+        skyboxMaterial = RenderSettings.skybox;
+        RenderSettings.fog = true;
+        RenderSettings.fogMode = FogMode.ExponentialSquared;
+        RenderSettings.fogDensity = 0.01f;
+        RenderSettings.fogColor = Color.gray;
         if (rainParticleSystem == null)
         {
             rainParticleSystem = GetComponent<ParticleSystem>();
@@ -77,7 +105,6 @@ public class RainController : MonoBehaviour
 
         if (rainParticleSystem != null)
         {
-            emissionModule = rainParticleSystem.emission;
             rainParticleSystem.Stop();
             isRaining = false;
             currentIntensity = 0f;
@@ -93,8 +120,20 @@ public class RainController : MonoBehaviour
 
         UpdateRainIntensity();
         UpdateLighting();
+        UpdateSkybox();
     }
-
+    private void UpdateSkybox()
+    {
+        if (skyboxMaterial == null)
+            return;
+        Color skyTint = Color.Lerp(normalSkyTint, rainySkyTint, currentIntensity);
+        Color groundColor = Color.Lerp(normalGroundColor, rainyGroundColor, currentIntensity);
+        float exposure = Mathf.Lerp(normalSkyExposure, rainySkyExposure, currentIntensity);
+        skyboxMaterial.SetColor("_SkyTint", skyTint);
+        skyboxMaterial.SetColor("_GroundColor", groundColor);
+        skyboxMaterial.SetFloat("_Exposure", exposure);
+        DynamicGI.UpdateEnvironment();
+    }
     private void ToggleRain()
     {
         if (rainParticleSystem == null)
@@ -113,17 +152,23 @@ public class RainController : MonoBehaviour
     private void UpdateRainIntensity()
     {
         if (rainParticleSystem == null)
-        {
             return;
-        }
 
-        float targetIntensity = isRaining ? 2f : 0f;
+        var emission = rainParticleSystem.emission;
+
+        float targetIntensity = isRaining ? 1f : 0f;
         float duration = isRaining ? rampUpDuration : rampDownDuration;
 
-        currentIntensity = Mathf.MoveTowards(currentIntensity, targetIntensity, Time.deltaTime / duration);
+        currentIntensity = Mathf.MoveTowards(
+            currentIntensity,
+            targetIntensity,
+            Time.deltaTime / duration
+        );
 
-        float emissionRate = Mathf.Lerp(minEmissionRate, maxEmissionRate, currentIntensity);
-        emissionModule.rateOverTime = emissionRate;
+        float emissionRate =
+            Mathf.Lerp(minEmissionRate, maxEmissionRate, currentIntensity);
+
+        emission.rateOverTime = emissionRate;
 
         if (!isRaining && currentIntensity <= 0f)
         {
@@ -131,18 +176,40 @@ public class RainController : MonoBehaviour
         }
     }
 
+
     private void UpdateLighting()
     {
+        float t = currentIntensity;
+
+        // Sun
         if (directionalLight != null)
         {
-            directionalLight.intensity = Mathf.Lerp(normalLightIntensity, rainyLightIntensity, currentIntensity);
+            directionalLight.intensity =
+                Mathf.Lerp(normalLightIntensity, rainyLightIntensity, t);
         }
 
+        // HDRP auto exposure darkening
+        if (autoExposure != null)
+        {
+            autoExposure.compensation.value =
+                Mathf.Lerp(0f, -2.2f, t);
+        }
+
+        // Desaturate colors (key for gray sky)
         if (colorAdjustments != null)
         {
-            overlay.color = new Color(0f, 0f, 0f, Mathf.Lerp(0f, 0.7f, currentIntensity));
+            colorAdjustments.saturation.value =
+                Mathf.Lerp(0f, -40f, t);
+        }
 
-            //colorAdjustments.postExposure.value = Mathf.Lerp(0f, rainyExposure, currentIntensity);
+        // Fog sells rain
+        if (fog != null)
+        {
+            fog.meanFreePath.value =
+                Mathf.Lerp(400f, 80f, t);
+
+            fog.albedo.value =
+                Color.Lerp(Color.white, Color.gray, t);
         }
     }
 }

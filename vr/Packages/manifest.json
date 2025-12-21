@@ -6,6 +6,7 @@
     "com.unity.learn.iet-framework": "4.0.4",
     "com.unity.multiplayer.center": "1.0.0",
     "com.unity.postprocessing": "3.4.0",
+    "com.unity.render-pipelines.high-definition": "17.0.3",
     "com.unity.render-pipelines.universal": "17.0.3",
     "com.unity.shadergraph": "17.0.3",
     "com.unity.terrain-tools": "5.1.2",
