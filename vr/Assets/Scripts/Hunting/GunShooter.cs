@@ -1,45 +1,53 @@
-using Hunting;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
-public class GunShooter : MonoBehaviour
+namespace Hunting
 {
-    public Transform muzzle;
-    public float range = 50f;
-    public LayerMask hitMask = ~0;
-
-    XRGrabInteractable grab;
-
-    void Awake()
+    public class GunShooter : MonoBehaviour
     {
-        grab = GetComponent<XRGrabInteractable>();
-        grab.activated.AddListener(OnActivated);
-    }
+        public Transform muzzle;
+        public float range = 50f;
+        public LayerMask hitMask = ~0;
 
-    void OnDestroy()
-    {
-        if (grab != null)
-            grab.activated.RemoveListener(OnActivated);
-    }
+        [Header("Audio")]
+        public AudioSource shotAudio;
 
-    void OnActivated(ActivateEventArgs args)
-    {
-        if (muzzle == null) return;
+        private XRGrabInteractable grab;
 
-        Ray ray = new Ray(muzzle.position, muzzle.forward);
-
-        if (Physics.Raycast(ray, out RaycastHit hit, range, hitMask, QueryTriggerInteraction.Ignore))
+        void Awake()
         {
-            Debug.Log($"[Gun] Hit: {hit.collider.name}");
-
-            var animal = hit.collider.GetComponentInParent<AnimalHealth>();
-            if (animal != null)
-                animal.KillOneShot();
+            grab = GetComponent<XRGrabInteractable>();
+            grab.activated.AddListener(OnActivated);
         }
-        else
+
+        void OnDestroy()
         {
-            Debug.Log("[Gun] Miss");
+            if (grab != null)
+                grab.activated.RemoveListener(OnActivated);
+        }
+
+        private void OnActivated(ActivateEventArgs args)
+        {
+            if (muzzle == null) return;
+
+            // Play shot sound every time we fire
+            if (shotAudio != null)
+                shotAudio.Play();
+
+            Ray ray = new Ray(muzzle.position, muzzle.forward);
+            if (Physics.Raycast(ray, out RaycastHit hit, range, hitMask, QueryTriggerInteraction.Ignore))
+            {
+                Debug.Log($"[Gun] Hit: {hit.collider.name}");
+
+                var health = hit.collider.GetComponentInParent<AnimalHealth>();
+                if (health != null)
+                    health.KillOneShot();
+            }
+            else
+            {
+                Debug.Log("[Gun] Miss");
+            }
         }
     }
 }
