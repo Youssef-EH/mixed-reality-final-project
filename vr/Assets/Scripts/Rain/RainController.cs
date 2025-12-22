@@ -6,8 +6,10 @@ using UnityEngine.UI;
 
 public class RainController : MonoBehaviour
 {
-    private int intensityStage = 0;
+    public GameObject tornadoBase;
 
+    private int intensityStage = 0;
+    
     private Exposure autoExposure;
     private ColorAdjustments colorAdjustments;
     private Fog fog;
@@ -73,7 +75,7 @@ public class RainController : MonoBehaviour
         skyboxMaterial = RenderSettings.skybox;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
-        RenderSettings.fogDensity = 0.01f;
+        RenderSettings.fogDensity = 0.00f;
         RenderSettings.fogColor = Color.gray;
         if (rainParticleSystem == null)
         {
@@ -138,7 +140,7 @@ public class RainController : MonoBehaviour
         skyboxMaterial.SetFloat("_Exposure", exposure);
         DynamicGI.UpdateEnvironment();
     }
-    private void ToggleRain()
+    public void ToggleRain()
     {
         if (rainParticleSystem == null)
         {
@@ -153,6 +155,14 @@ public class RainController : MonoBehaviour
         {
             intensityStage++;
             isRaining = true;
+        }
+        if (intensityStage == 4)
+        {
+            tornadoBase.SetActive(true);
+        }
+        else
+        {
+            tornadoBase.SetActive(false);
         }
         if (isRaining)
         {

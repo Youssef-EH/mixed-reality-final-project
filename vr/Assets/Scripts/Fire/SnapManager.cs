@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SnapManager : MonoBehaviour
 {
+    public RainController rainController;
     public bool allFilled;
     public GameObject fire;
     [HideInInspector]
@@ -29,6 +30,7 @@ public class SnapManager : MonoBehaviour
 
         allFilled = true;
         fire.SetActive(true);
+        rainController.ToggleRain();
         Debug.Log("All branches snapped! allFilled = TRUE");
     }
 }
