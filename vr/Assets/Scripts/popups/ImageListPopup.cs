@@ -32,17 +32,17 @@ public class ImageListPopup : MonoBehaviour
 
     void Update()
     {
-        if (Keyboard.current.enterKey.wasPressedThisFrame)
-        {
-            if (isPlaying)
-                return;
+        //if (Keyboard.current.enterKey.wasPressedThisFrame)
+        //{
+        //    if (isPlaying)
+        //        return;
 
-            if (currentParentIndex < popupParents.Count)
-            {
-                StartCoroutine(ShowCanvasesCoroutine(popupParents[currentParentIndex]));
-                currentParentIndex++;
-            }
-        }
+        //    if (currentParentIndex < popupParents.Count)
+        //    {
+        //        StartCoroutine(ShowCanvasesCoroutine(popupParents[currentParentIndex]));
+        //        currentParentIndex++;
+        //    }
+        //}
     }
 
     public IEnumerator ShowCanvasesCoroutine(GameObject parent)
