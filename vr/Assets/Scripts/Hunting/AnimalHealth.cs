@@ -9,6 +9,9 @@ namespace Hunting
 
         [Header("Death VFX")] public GameObject deathVfxPrefab;
         public float vfxLifetime = 3f;
+        
+        [Header("Weirdness - Meat Gust")]
+        public MeatGustBurst meatGust;
 
         private bool dead;
 
@@ -33,6 +36,12 @@ namespace Hunting
             if (meatPrefab != null)
             {
                 Instantiate(meatPrefab, pos, Quaternion.identity);
+            }
+            
+            // Weirdness: Meat gust burst
+            if (meatGust != null)
+            {
+                meatGust.PlayAt(pos);
             }
 
             // Then remove the animal
