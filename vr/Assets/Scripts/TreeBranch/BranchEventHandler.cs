@@ -9,6 +9,8 @@ public class BranchEventHandler : MonoBehaviour
     public XRGrabInteractable branch1;
     public XRGrabInteractable branch2;
     public XRGrabInteractable branch3;
+    public ImageListPopup imageListPopup;
+    public GameObject popupParent;
 
     private int branchesTaken = 0;
     private bool rainTriggered = false;
@@ -32,6 +34,7 @@ public class BranchEventHandler : MonoBehaviour
             {
                 rainTriggered = true;
                 rainController.ToggleRain();
+                StartCoroutine(imageListPopup.ShowCanvasesCoroutine(popupParent.gameObject));
             }
         }
     }

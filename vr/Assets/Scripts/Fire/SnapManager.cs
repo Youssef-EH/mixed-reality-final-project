@@ -5,6 +5,9 @@ using UnityEngine;
 public class SnapManager : MonoBehaviour
 {
     public RainController rainController;
+    public GameObject popupParent;
+    public ImageListPopup imageListPopup;
+
     public bool allFilled;
     public GameObject fire;
     [HideInInspector]
@@ -31,6 +34,7 @@ public class SnapManager : MonoBehaviour
         allFilled = true;
         fire.SetActive(true);
         rainController.ToggleRain();
+        StartCoroutine(imageListPopup.ShowCanvasesCoroutine(popupParent));
         Debug.Log("All branches snapped! allFilled = TRUE");
     }
 }

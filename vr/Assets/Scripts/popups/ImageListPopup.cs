@@ -10,7 +10,7 @@ public class ImageListPopup : MonoBehaviour
 {
     public List<GameObject> popupParents;
 
-    public float startingDelay = 1.5f;
+    public float startingDelay = 1f;
     public float delayDecrease = 0.2f;
     public float minimumDelay = 0.2f;
     public float stayVisibleTime = 3f;
@@ -45,7 +45,7 @@ public class ImageListPopup : MonoBehaviour
         }
     }
 
-    private IEnumerator ShowCanvasesCoroutine(GameObject parent)
+    public IEnumerator ShowCanvasesCoroutine(GameObject parent)
     {
         isPlaying = true;
 
