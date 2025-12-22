@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class RainController : MonoBehaviour
 {
+    private int intensityStage = 0;
+
     private Exposure autoExposure;
     private ColorAdjustments colorAdjustments;
     private Fog fog;
@@ -96,6 +98,8 @@ public class RainController : MonoBehaviour
             }
             colorAdjustments.postExposure.overrideState = true;
             colorAdjustments.postExposure.value = 0f;
+            colorAdjustments.colorFilter.overrideState = true;
+            colorAdjustments.saturation.overrideState = true;
         }
 
         if (directionalLight != null)
@@ -140,9 +144,16 @@ public class RainController : MonoBehaviour
         {
             return;
         }
-
-        isRaining = !isRaining;
-
+        if(intensityStage>=4)
+        {
+            intensityStage = 0;
+            isRaining = false;
+        }
+        else
+        {
+            intensityStage++;
+            isRaining = true;
+        }
         if (isRaining)
         {
             rainParticleSystem.Play();
@@ -156,7 +167,7 @@ public class RainController : MonoBehaviour
 
         var emission = rainParticleSystem.emission;
 
-        float targetIntensity = isRaining ? 1f : 0f;
+        float targetIntensity = isRaining ? (0.25f*intensityStage) : 0f;
         float duration = isRaining ? rampUpDuration : rampDownDuration;
 
         currentIntensity = Mathf.MoveTowards(
@@ -194,7 +205,16 @@ public class RainController : MonoBehaviour
             autoExposure.compensation.value =
                 Mathf.Lerp(0f, -2.2f, t);
         }
-
+        //NIEUW
+        if (colorAdjustments != null)
+        {
+            colorAdjustments.colorFilter.value =
+                Color.Lerp(
+                    Color.white,
+                    new Color(0.8f, 0.8f, 0.8f), // rainy gray
+                    t
+                );
+        }
         // Desaturate colors (key for gray sky)
         if (colorAdjustments != null)
         {
