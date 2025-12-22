@@ -17400,7 +17400,7 @@ MonoBehaviour:
   startingDelay: 0.5
   delayDecrease: 0.1
   minimumDelay: 0.1
-  stayVisibleTime: 5
+  stayVisibleTime: 3
 --- !u!1 &6805805674045300695
 GameObject:
   m_ObjectHideFlags: 0
