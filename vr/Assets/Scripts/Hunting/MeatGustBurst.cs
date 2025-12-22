@@ -21,7 +21,7 @@ namespace Hunting
         public float turbulenceFrequency = 0.6f;
 
         [Header("Motion - Clamp (keeps it visible)")]
-        public float maxSpeed = 3f;
+        public float maxSpeed = 3.2f;
 
         [Header("Lifetime / Performance")]
         public float lifetime = 7f;
