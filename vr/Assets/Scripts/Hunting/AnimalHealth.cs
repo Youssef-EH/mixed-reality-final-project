@@ -4,6 +4,8 @@ namespace Hunting
 {
     public class AnimalHealth : MonoBehaviour
     {
+        public System.Action<AnimalHealth> Killed;
+        
         [Header("Meat")] public GameObject meatPrefab;
         public Transform meatSpawnPoint;
 
@@ -43,6 +45,9 @@ namespace Hunting
             {
                 meatGust.PlayAt(pos);
             }
+            
+            // invoke Killed event
+            Killed?.Invoke(this);
 
             // Then remove the animal
             gameObject.SetActive(false);
