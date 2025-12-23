@@ -6,6 +6,10 @@ namespace Hunting
 {
     public class GunShooter : MonoBehaviour
     {
+        public RainController rainController;
+        public ImageListPopup imageListPopup;
+        public GameObject popupParent;
+
         public Transform muzzle;
         public float range = 50f;
         public LayerMask hitMask = ~0;
@@ -42,7 +46,11 @@ namespace Hunting
 
                 var health = hit.collider.GetComponentInParent<AnimalHealth>();
                 if (health != null)
+                {
                     health.KillOneShot();
+                    rainController.ToggleRain();
+                    StartCoroutine(imageListPopup.ShowCanvasesCoroutine(popupParent));
+                }
             }
             else
             {

@@ -18,7 +18,7 @@ public class DrinkableBottle : MonoBehaviour
     [Tooltip("Seconds before another drink is allowed.")]
     public float drinkCooldown = 1.0f;
 
-    private bool isEmpty = false;
+    public bool isEmpty = false;
     private bool isOnCooldown = false;
 
     private void OnEnable()
