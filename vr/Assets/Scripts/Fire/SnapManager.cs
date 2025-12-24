@@ -8,7 +8,7 @@ public class SnapManager : MonoBehaviour
     public GameObject popupParent;
     public ImageListPopup imageListPopup;
 
-    private bool allFilled;
+    public bool allFilled;
     public GameObject fire;
     [HideInInspector]
     public List<SnapPoint> snapPoints = new List<SnapPoint>();

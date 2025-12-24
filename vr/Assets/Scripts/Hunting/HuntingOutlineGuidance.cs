@@ -19,7 +19,6 @@ namespace Hunting
 
         void Reset()
         {
-            // Optional auto-wiring attempt if you add this script in the editor
             gunGrab = FindFirstObjectByType<XRGrabInteractable>();
         }
 
@@ -79,11 +78,8 @@ namespace Hunting
         private void OnDeerKilled(AnimalHealth deer)
         {
             deerKilled = true;
-
-            // Deer is done, turn off deer outline
             SetDeerOutline(false);
-
-            // Optional: also remove gun outline after kill
+            
             if (removeGunOutlineAfterKill)
                 SetGunOutline(false);
         }

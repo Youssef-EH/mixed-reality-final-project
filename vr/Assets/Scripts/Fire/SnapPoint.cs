@@ -80,6 +80,11 @@ public class SnapPoint : MonoBehaviour
         grab.transform.position = snapPosition.position;
         grab.transform.rotation = snapPosition.rotation;
 
+        // After snapping succeeds: add marker to root object
+        var root = rb != null ? rb.gameObject : grab.gameObject;
+        if (root.GetComponent<SnapMarker>() == null)
+            root.AddComponent<SnapMarker>();
+
         outlineIndicator.SetActive(false);
 
         // Mark as filled
