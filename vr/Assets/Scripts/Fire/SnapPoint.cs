@@ -66,6 +66,13 @@ public class SnapPoint : MonoBehaviour
         grab.gameObject.AddComponent<SnapMarker>();
         // Disable grabbing
         grab.enabled = false;
+        
+        // Disable outlines
+        var outlines = grab.GetComponentsInChildren<Outline>(true);
+        foreach (var t in outlines)
+        {
+            t.enabled = false;
+        }
 
         // Stop physics
         Rigidbody rb = grab.GetComponent<Rigidbody>();
