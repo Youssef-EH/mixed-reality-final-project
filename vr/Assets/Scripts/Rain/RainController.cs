@@ -1,7 +1,9 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class RainController : MonoBehaviour
@@ -159,6 +161,7 @@ public class RainController : MonoBehaviour
         if (intensityStage == 4)
         {
             tornadoBase.SetActive(true);
+            StartCoroutine(WaitCoroutine());
         }
         else
         {
@@ -241,5 +244,11 @@ public class RainController : MonoBehaviour
             fog.albedo.value =
                 Color.Lerp(Color.white, Color.gray, t);
         }
+    }
+    
+    IEnumerator WaitCoroutine()
+    {
+        yield return new WaitForSecondsRealtime(35f);
+        SceneManager.LoadScene("EndScene");
     }
 }
