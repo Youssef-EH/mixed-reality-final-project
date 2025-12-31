@@ -24,7 +24,7 @@ public class SnapManager : MonoBehaviour
         foreach (SnapPoint sp in snapPoints)
         {
             number++;
-            if (!sp.isFilled && number<=0)
+            if (!sp.isFilled && number<=0) //zet naar 3 voor alle takken, wordt nu sowieso geskipt
             {
                 allFilled = false;
                 return;
