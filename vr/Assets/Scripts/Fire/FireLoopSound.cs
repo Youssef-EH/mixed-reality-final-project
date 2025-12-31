@@ -9,7 +9,7 @@ namespace Fire
         public AudioSource audioSource;
         public AudioClip fireLoopClip;
         [Range(0f, 1f)]
-        public float volume = 0.5f;
+        public float volume = 0.7f;
 
         [Range(0f, 1f)]
         public float spatialBlend = 1f;
