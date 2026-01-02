@@ -285,7 +285,7 @@ public class RainController : MonoBehaviour
     
     IEnumerator WaitCoroutine()
     {
-        yield return new WaitForSecondsRealtime(35f);
+        yield return new WaitForSecondsRealtime(32f);
         SceneManager.LoadScene("EndScene");
     }
 }
