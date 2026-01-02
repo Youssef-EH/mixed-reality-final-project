@@ -28,12 +28,29 @@ public class ImageListPopup : MonoBehaviour
                 canvas.gameObject.SetActive(false);
             }
         }
+        StartCoroutine(PreloadAudio());
+    }
+    private IEnumerator PreloadAudio()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        foreach (GameObject parent in popupParents)
+        {
+            AudioSource audio = parent.GetComponent<AudioSource>();
+            if (audio != null && audio.clip != null)
+            {
+                // Force load the audio clip
+                audio.volume = 0f;
+                audio.Play();
+                yield return null; // Wait one frame for audio to load
+                audio.Stop();
+            }
+        }
     }
 
     public IEnumerator ShowCanvasesCoroutine(GameObject parent)
     {
         isPlaying = true;
-
         AudioSource audio = parent.GetComponent<AudioSource>();
 
         if (audio != null)
@@ -41,7 +58,6 @@ public class ImageListPopup : MonoBehaviour
             audio.volume = 0f;
             audio.loop = false;
             audio.Play();
-
             StartCoroutine(FadeInAudio(audio, 0.5f, 5f));
         }
 
@@ -50,9 +66,20 @@ public class ImageListPopup : MonoBehaviour
 
         foreach (Canvas canvas in canvases)
         {
-            yield return null;
+            // Spread activation across multiple frames
+            yield return null; // Wait one frame
             canvas.gameObject.SetActive(true);
+
+            // Force layout rebuild in chunks if needed
+            if (canvas.GetComponent<CanvasGroup>() == null)
+            {
+                var cg = canvas.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 1f;
+            }
+
+            yield return null; // Another frame for Canvas to rebuild
             yield return new WaitForSeconds(currentDelay);
+
             currentDelay = Mathf.Max(minimumDelay, currentDelay - delayDecrease);
         }
 
@@ -61,18 +88,17 @@ public class ImageListPopup : MonoBehaviour
         foreach (Canvas canvas in canvases)
         {
             canvas.gameObject.SetActive(false);
+            yield return null; // Spread deactivation too
         }
 
         if (audio != null)
         {
             yield return StartCoroutine(FadeOutAudio(audio, 1f));
-
             audio.Stop();
         }
 
         isPlaying = false;
     }
-
     private IEnumerator FadeInAudio(AudioSource audio, float targetVolume, float duration)
     {
         float startVolume = audio.volume;
