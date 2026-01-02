@@ -123,7 +123,6 @@ public class RainController : MonoBehaviour
             currentIntensity = 0f;
         }
     }
-
     private void Update()
     {
         if (Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame)
@@ -136,6 +135,8 @@ public class RainController : MonoBehaviour
         UpdateSkybox();
         UpdateRainAudio();
     }
+
+    private float lastGIUpdateIntensity = -1f;
     private void UpdateSkybox()
     {
         if (skyboxMaterial == null)
@@ -146,7 +147,11 @@ public class RainController : MonoBehaviour
         skyboxMaterial.SetColor("_SkyTint", skyTint);
         skyboxMaterial.SetColor("_GroundColor", groundColor);
         skyboxMaterial.SetFloat("_Exposure", exposure);
-        DynamicGI.UpdateEnvironment();
+        if (Mathf.Abs(currentIntensity - lastGIUpdateIntensity) > 0.25f)
+        {
+            DynamicGI.UpdateEnvironment();
+            lastGIUpdateIntensity = currentIntensity;
+        }
     }
     public void ToggleRain()
     {
@@ -273,14 +278,14 @@ public class RainController : MonoBehaviour
         }
 
         // Fog sells rain
-        if (fog != null)
-        {
-            fog.meanFreePath.value =
-                Mathf.Lerp(400f, 80f, t);
+        //if (fog != null)
+        //{
+        //    fog.meanFreePath.value =
+        //        Mathf.Lerp(400f, 80f, t);
 
-            fog.albedo.value =
-                Color.Lerp(Color.white, Color.gray, t);
-        }
+        //    fog.albedo.value =
+        //        Color.Lerp(Color.white, Color.gray, t);
+        //}
     }
     
     IEnumerator WaitCoroutine()

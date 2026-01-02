@@ -50,6 +50,7 @@ public class ImageListPopup : MonoBehaviour
 
         foreach (Canvas canvas in canvases)
         {
+            yield return null;
             canvas.gameObject.SetActive(true);
             yield return new WaitForSeconds(currentDelay);
             currentDelay = Mathf.Max(minimumDelay, currentDelay - delayDecrease);
