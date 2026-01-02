@@ -88,12 +88,10 @@ public class ImageListPopup : MonoBehaviour
         foreach (Canvas canvas in canvases)
         {
             canvas.gameObject.SetActive(false);
-            yield return null; // Spread deactivation too
         }
 
         if (audio != null)
         {
-            yield return StartCoroutine(FadeOutAudio(audio, 1f));
             audio.Stop();
         }
 
