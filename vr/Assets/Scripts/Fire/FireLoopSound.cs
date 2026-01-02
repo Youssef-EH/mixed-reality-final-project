@@ -8,6 +8,8 @@ namespace Fire
         [Header("Audio")]
         public AudioSource audioSource;
         public AudioClip fireLoopClip;
+        [Range(0f, 1f)]
+        public float volume = 0.7f;
 
         [Range(0f, 1f)]
         public float spatialBlend = 1f;
@@ -23,6 +25,7 @@ namespace Fire
             audioSource.playOnAwake = false;
             audioSource.loop = true;
             audioSource.spatialBlend = spatialBlend;
+            audioSource.volume = volume;
         }
 
         private void OnEnable()
@@ -33,6 +36,7 @@ namespace Fire
             audioSource.clip = fireLoopClip;
             audioSource.loop = true;
             audioSource.spatialBlend = spatialBlend;
+            audioSource.volume = volume;
 
             if (!audioSource.isPlaying)
                 audioSource.Play();

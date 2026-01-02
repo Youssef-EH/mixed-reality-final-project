@@ -1,6 +1,12 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class ThrowBottleHandler : MonoBehaviour
 {
@@ -8,15 +14,17 @@ public class ThrowBottleHandler : MonoBehaviour
     public ImageListPopup imageListPopup;
     public GameObject popupParent;
     public XRGrabInteractable bottle;
+
+    [SerializeField] private XRBaseInteractor interactor;
+    [SerializeField] private InputActionReference selectAction;
     void Start()
     {
         bottle.gameObject.TryGetComponent<DrinkableBottle>(out _);
-        bottle.selectExited.AddListener(OnBottleThrown);
     }
-    //weerverandering en fotos
-    private void OnBottleThrown(SelectExitEventArgs args)
+
+    public void OnBottleThrown(XRGrabInteractable bottle)
     {
-        XRGrabInteractable thrownBottle = args.interactableObject as XRGrabInteractable;
+        XRGrabInteractable thrownBottle = bottle;
 
         if(!thrownBottle.gameObject.TryGetComponent<BottleThrownMarker>(out _))
         {
@@ -24,10 +32,6 @@ public class ThrowBottleHandler : MonoBehaviour
             rainController.ToggleRain();
             StartCoroutine(imageListPopup.ShowCanvasesCoroutine(popupParent));
         }
-    }
-    private void OnDestroy()
-    {
-        bottle.selectExited.RemoveListener(OnBottleThrown);
     }
 }
 public class BottleThrownMarker : MonoBehaviour { }

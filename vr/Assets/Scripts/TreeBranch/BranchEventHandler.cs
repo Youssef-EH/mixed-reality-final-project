@@ -39,7 +39,7 @@ public class BranchEventHandler : MonoBehaviour
             // ✅ Play pull sound ONLY once (first time branch is taken)
             PlayBranchPullSoundOnce(takenBranch.gameObject);
 
-            if (branchesTaken >= 3 && !rainTriggered)
+            if (branchesTaken >= 1 && !rainTriggered) //zet naar 3 voor alle takken
             {
                 rainTriggered = true;
                 rainController.ToggleRain();

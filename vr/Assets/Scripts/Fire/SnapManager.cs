@@ -8,7 +8,7 @@ public class SnapManager : MonoBehaviour
     public GameObject popupParent;
     public ImageListPopup imageListPopup;
 
-    public bool allFilled;
+    public bool allFilled = false;
     public GameObject fire;
     [HideInInspector]
     public List<SnapPoint> snapPoints = new List<SnapPoint>();
@@ -24,18 +24,20 @@ public class SnapManager : MonoBehaviour
         foreach (SnapPoint sp in snapPoints)
         {
             number++;
-            if (!sp.isFilled && number<=3)
+            if (!sp.isFilled && number<=0) //zet naar 3 voor alle takken, wordt nu sowieso geskipt
             {
                 allFilled = false;
                 return;
             }
         }
-
-        allFilled = true;
-        fire.SetActive(true);
-        rainController.ToggleRain();
-        StartCoroutine(imageListPopup.ShowCanvasesCoroutine(popupParent));
-        Debug.Log("All branches snapped! allFilled = TRUE");
+        if(allFilled==false)
+        {
+            allFilled = true;
+            fire.SetActive(true);
+            rainController.ToggleRain();
+            StartCoroutine(imageListPopup.ShowCanvasesCoroutine(popupParent));
+            Debug.Log("All branches snapped! allFilled = TRUE");
+        }
     }
 }
 

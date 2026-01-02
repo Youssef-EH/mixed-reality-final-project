@@ -15,6 +15,11 @@ public class RainController : MonoBehaviour
     private Exposure autoExposure;
     private ColorAdjustments colorAdjustments;
     private Fog fog;
+
+    [Header("Rain Audio")]
+    public AudioSource lightRainAudio;
+    public AudioSource heavyRainAudio;
+
     [Header("Rain Settings")]
     public ParticleSystem rainParticleSystem;
 
@@ -129,6 +134,7 @@ public class RainController : MonoBehaviour
         UpdateRainIntensity();
         UpdateLighting();
         UpdateSkybox();
+        UpdateRainAudio();
     }
     private void UpdateSkybox()
     {
@@ -170,9 +176,40 @@ public class RainController : MonoBehaviour
         if (isRaining)
         {
             rainParticleSystem.Play();
+
+            if (!lightRainAudio.isPlaying)
+                lightRainAudio.Play();
+
+            if (!heavyRainAudio.isPlaying)
+                heavyRainAudio.Play();
         }
     }
+    private void UpdateRainAudio()
+    {
+        float heavyRainThreshold = 2f;
+        float audioFadeSpeed = 1.5f;
 
+        if (!isRaining)
+        {
+            lightRainAudio.volume = Mathf.MoveTowards(
+                lightRainAudio.volume, 0f, Time.deltaTime * audioFadeSpeed);
+
+            heavyRainAudio.volume = Mathf.MoveTowards(
+                heavyRainAudio.volume, 0f, Time.deltaTime * audioFadeSpeed);
+
+            return;
+        }
+
+        float lightTarget = Mathf.Clamp(intensityStage / (float)heavyRainThreshold, 0, 0.5f);
+
+        float heavyTarget = intensityStage > heavyRainThreshold ? 0.5f : 0f;
+
+        lightRainAudio.volume = Mathf.MoveTowards(
+            lightRainAudio.volume, lightTarget, Time.deltaTime * audioFadeSpeed);
+
+        heavyRainAudio.volume = Mathf.MoveTowards(
+            heavyRainAudio.volume, heavyTarget, Time.deltaTime * audioFadeSpeed);
+    }
     private void UpdateRainIntensity()
     {
         if (rainParticleSystem == null)
