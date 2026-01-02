@@ -1,0 +1,67 @@
+using System.Collections;
+using Unity.Mathematics;
+using UnityEngine;
+
+public class Fade_Screen : MonoBehaviour
+{
+    public static Fade_Screen Instance { get; private set; }
+
+    public bool fadeOnStart = true;
+    public float fadeDuration = 2;
+    public Color fadeColor;
+    private Renderer rend;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        rend = GetComponent<Renderer>();
+    }
+
+    void Start()
+    {
+        fadeIn();
+    }
+
+    public void fadeIn()
+    {
+        fade(1, 0);
+    }
+
+    public void fadeOut()
+    {
+        fade(0, 1);
+    }
+
+    private void fade(float startAlpha, float endAlpha)
+    {
+        StopAllCoroutines();
+        StartCoroutine(FadeRoutine(startAlpha, endAlpha));
+    }
+
+    public IEnumerator FadeRoutine(float startAlpha, float endAlpha)
+    {
+        float timer = 0;
+        Color newColor = fadeColor;
+        newColor.a = startAlpha;
+        rend.material.SetColor("_BaseColor", newColor);
+        while (timer < fadeDuration)
+        {
+            float t = timer / fadeDuration;
+            newColor.a = Mathf.Lerp(startAlpha, endAlpha, t);
+            rend.material.SetColor("_BaseColor", newColor);
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        newColor.a = endAlpha;
+        rend.material.SetColor("_BaseColor", newColor);
+    }
+}
