@@ -114,7 +114,8 @@ public class VRBodyFollower : MonoBehaviour
 
         // --- Y: ground only ---
         RaycastHit hit;
-        if (Physics.Raycast(head.position, Vector3.down, out hit, 10f, groundMask))
+        Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
+        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, 10f, groundMask))
         {
             bodyPos.y = hit.point.y + footOffset;
         }
