@@ -18,11 +18,24 @@ namespace Hunting
         public AudioSource shotAudio;
 
         private XRGrabInteractable grab;
+        private Rigidbody rb;
 
         void Awake()
         {
             grab = GetComponent<XRGrabInteractable>();
+            grab.selectEntered.AddListener(OnGrabbed);
+            grab.selectExited.AddListener(OnDropped);
             grab.activated.AddListener(OnActivated);
+        }
+
+        private void OnGrabbed(SelectEnterEventArgs args)
+        {
+            GetComponent<Rigidbody>().isKinematic = false;
+        }
+
+        private void OnDropped(SelectExitEventArgs args)
+        {
+            GetComponent<Rigidbody>().isKinematic = false;
         }
 
         void OnDestroy()
