@@ -23,6 +23,10 @@ public class Fade_Screen : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         rend = GetComponent<Renderer>();
+
+        Color c = fadeColor;
+        c.a = 0f;
+        rend.material.SetColor("_BaseColor", c);
     }
 
     public void AttachToCamera(Camera cam)
@@ -42,11 +46,13 @@ public class Fade_Screen : MonoBehaviour
 
     public void fadeIn()
     {
+        rend.enabled = true;
         fade(1, 0);
     }
 
     public void fadeOut()
     {
+        rend.enabled = true;
         fade(0, 1);
     }
 
@@ -74,5 +80,16 @@ public class Fade_Screen : MonoBehaviour
 
         newColor.a = endAlpha;
         rend.material.SetColor("_BaseColor", newColor);
+    }
+    public void ForceTransparent()
+    {
+        StopAllCoroutines();
+
+        Color c = fadeColor;
+        c.a = 0f;
+        rend.material.SetColor("_BaseColor", c);
+
+        // Optional but recommended
+        rend.enabled = false;
     }
 }

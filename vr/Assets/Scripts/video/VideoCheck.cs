@@ -4,23 +4,14 @@ using UnityEngine.Video;
 public class VideoCheck : MonoBehaviour
 {
     public VideoPlayer videoPlayer;
-    private bool finished = false;
-    private bool hasStarted = false;
 
-    // Update is called once per frame
-    void Update()
+    void Start()
     {
-        if (videoPlayer.isPlaying)
-        {
-            hasStarted = true;
-        }
-        if (hasStarted) 
-        {
-            if (!videoPlayer.isPlaying && !finished)
-            {
-                finished = true;
-                SceneSequenceManager.Instance.NextScene();
-            }
-        }
+        videoPlayer.loopPointReached += OnVideoFinished;
+    }
+
+    void OnVideoFinished(VideoPlayer vp)
+    {
+        SceneSequenceManager.Instance.NextScene();
     }
 }

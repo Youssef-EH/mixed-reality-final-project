@@ -13,7 +13,7 @@ public class ImageListPopup : MonoBehaviour
     public float startingDelay = 0.5f;
     public float delayDecrease = 0.1f;
     public float minimumDelay = 0.1f;
-    public float stayVisibleTime = 5f;
+    public float stayVisibleTime = 3f;
 
     private int currentParentIndex = 0;
     private bool isPlaying = false;

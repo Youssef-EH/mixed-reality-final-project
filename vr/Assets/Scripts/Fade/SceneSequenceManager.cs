@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -8,27 +7,8 @@ public class SceneSequenceManager : MonoBehaviour
 
     public string[] sceneOrder;
 
-    private int currentIndex = 0;
-
-    void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        currentIndex++;
-
-        Fade_Screen.Instance.AttachToCamera(Camera.main);
-
-        // Fade in
-        Fade_Screen.Instance.fadeIn();
-    }
-
-    void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
+    private int currentSceneIndex = 0;
+    private AsyncOperation preloadOperation;
 
     private void Awake()
     {
@@ -37,26 +17,60 @@ public class SceneSequenceManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
-    public void NextScene()
+    public void PreloadNextScene()
     {
-        if (currentIndex >= sceneOrder.Length) return;
+        if (preloadOperation != null)
+            return;
 
-        StartCoroutine(TransitionToNextScene());
+        if (currentSceneIndex + 1 >= sceneOrder.Length)
+            return;
+
+        preloadOperation = SceneManager.LoadSceneAsync(sceneOrder[currentSceneIndex + 1]);
+        preloadOperation.allowSceneActivation = false;
     }
 
-    private IEnumerator TransitionToNextScene()
+    public void NextScene()
     {
-        // Fade out
+        if (preloadOperation == null)
+        {
+            Debug.LogError("NextScene called before preload!");
+            return;
+        }
+
+        StartCoroutine(ActivateNextScene());
+    }
+
+    private System.Collections.IEnumerator ActivateNextScene()
+    {
         Fade_Screen.Instance.fadeOut();
         yield return new WaitForSeconds(Fade_Screen.Instance.fadeDuration);
 
         Fade_Screen.Instance.DetachFromCamera();
 
-        // Load next scene
-        SceneManager.LoadScene(sceneOrder[currentIndex]);
+        currentSceneIndex++;
+        preloadOperation.allowSceneActivation = true;
+        preloadOperation = null;
+    }
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene,
+                               UnityEngine.SceneManagement.LoadSceneMode mode)
+    {
+        Fade_Screen.Instance.AttachToCamera(Camera.main);
+
+        Fade_Screen.Instance.ForceTransparent();
     }
 }

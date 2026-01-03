@@ -249,6 +249,7 @@ public class RainController : MonoBehaviour
         if (intensityStage == 4)
         {
             tornadoBase.SetActive(true);
+            SceneSequenceManager.Instance.PreloadNextScene();
             StartCoroutine(WaitCoroutine());
         }
         else
@@ -357,7 +358,7 @@ public class RainController : MonoBehaviour
     
     IEnumerator WaitCoroutine()
     {
-        yield return new WaitForSecondsRealtime(35f);
+        yield return new WaitForSecondsRealtime(30f);
         SceneSequenceManager.Instance.NextScene();
     }
 }
