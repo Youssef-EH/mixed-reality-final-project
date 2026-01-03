@@ -26,12 +26,23 @@ public class ThrowBottleHandler : MonoBehaviour
     {
         XRGrabInteractable thrownBottle = bottle;
 
-        if(!thrownBottle.gameObject.TryGetComponent<BottleThrownMarker>(out _))
+        if (!thrownBottle.gameObject.TryGetComponent<BottleThrownMarker>(out _))
         {
             thrownBottle.gameObject.AddComponent<BottleThrownMarker>();
-            rainController.ToggleRain();
-            StartCoroutine(imageListPopup.ShowCanvasesCoroutine(popupParent));
+
+            StartCoroutine(HandleBottleThrownSequence());
         }
+    }
+    private IEnumerator HandleBottleThrownSequence()
+    {
+        yield return null;
+
+        StartCoroutine(imageListPopup.ShowCanvasesCoroutine(popupParent));
+
+        yield return new WaitForSeconds(0.5f);
+
+        rainController.ToggleRain();
+
     }
 }
 public class BottleThrownMarker : MonoBehaviour { }

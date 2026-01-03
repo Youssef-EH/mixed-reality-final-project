@@ -211,7 +211,7 @@ namespace ithappy.Animals_FREE
                 displacement += m_GravityAcelleration;
                 displacement *= deltaTime;
 
-                m_Controller.Move(displacement);
+                //m_Controller.Move(displacement);
             }
 
             private void CaculateGravity(float deltaTime, out bool isAir)

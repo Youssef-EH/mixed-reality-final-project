@@ -122,8 +122,68 @@ public class RainController : MonoBehaviour
             isRaining = false;
             currentIntensity = 0f;
         }
-    }
+        if (lightRainAudio != null)
+        {
+            lightRainAudio.volume = 0f;
+            lightRainAudio.Play();
+            lightRainAudio.Stop();
+        }
 
+        if (heavyRainAudio != null)
+        {
+            heavyRainAudio.volume = 0f;
+            heavyRainAudio.Play();
+            heavyRainAudio.Stop();
+        }
+        StartCoroutine(WarmupRain());
+    }
+    private IEnumerator WarmupRain()
+    {
+        isRaining = true;
+        intensityStage = 1;
+
+        rainParticleSystem.Play();
+
+        // Force at least one simulation step
+        rainParticleSystem.Simulate(0.1f, true, true);
+
+        // Apply lighting once
+        UpdateRainIntensity();
+        UpdateLighting();
+        UpdateSkybox();
+
+        yield return null; // allow GPU upload
+
+        isRaining = false;
+        intensityStage = 0;
+        currentIntensity = 0f;
+
+        rainParticleSystem.Clear(true);
+        rainParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        // Reset lighting
+        if (directionalLight != null)
+            directionalLight.intensity = normalLightIntensity;
+
+        if (autoExposure != null)
+            autoExposure.compensation.value = 0f;
+
+        if (colorAdjustments != null)
+        {
+            colorAdjustments.saturation.value = 0f;
+            colorAdjustments.colorFilter.value = Color.white;
+        }
+
+        // Skybox reset
+        if (skyboxMaterial != null)
+        {
+            skyboxMaterial.SetColor("_SkyTint", normalSkyTint);
+            skyboxMaterial.SetColor("_GroundColor", normalGroundColor);
+            skyboxMaterial.SetFloat("_Exposure", normalSkyExposure);
+        }
+
+        yield return null;
+    }
     private void Update()
     {
         if (Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame)
@@ -136,16 +196,38 @@ public class RainController : MonoBehaviour
         UpdateSkybox();
         UpdateRainAudio();
     }
+
+    private float lastGIUpdateIntensity = -1f;
+    private Coroutine giUpdateCoroutine;
+
     private void UpdateSkybox()
     {
         if (skyboxMaterial == null)
             return;
+
         Color skyTint = Color.Lerp(normalSkyTint, rainySkyTint, currentIntensity);
         Color groundColor = Color.Lerp(normalGroundColor, rainyGroundColor, currentIntensity);
         float exposure = Mathf.Lerp(normalSkyExposure, rainySkyExposure, currentIntensity);
+
         skyboxMaterial.SetColor("_SkyTint", skyTint);
         skyboxMaterial.SetColor("_GroundColor", groundColor);
         skyboxMaterial.SetFloat("_Exposure", exposure);
+
+        // Defer GI update across multiple frames
+        if (Mathf.Abs(currentIntensity - lastGIUpdateIntensity) > 0.25f)
+        {
+            if (giUpdateCoroutine != null)
+                StopCoroutine(giUpdateCoroutine);
+            giUpdateCoroutine = StartCoroutine(DeferredGIUpdate());
+            lastGIUpdateIntensity = currentIntensity;
+        }
+    }
+
+    private IEnumerator DeferredGIUpdate()
+    {
+        // Wait a few frames to spread the cost
+        yield return null;
+        yield return null;
         DynamicGI.UpdateEnvironment();
     }
     public void ToggleRain()
@@ -270,16 +352,6 @@ public class RainController : MonoBehaviour
         {
             colorAdjustments.saturation.value =
                 Mathf.Lerp(0f, -40f, t);
-        }
-
-        // Fog sells rain
-        if (fog != null)
-        {
-            fog.meanFreePath.value =
-                Mathf.Lerp(400f, 80f, t);
-
-            fog.albedo.value =
-                Color.Lerp(Color.white, Color.gray, t);
         }
     }
     
