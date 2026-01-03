@@ -6,10 +6,11 @@ public class Fade_Screen : MonoBehaviour
 {
     public static Fade_Screen Instance { get; private set; }
 
-    public bool fadeOnStart = true;
     public float fadeDuration = 2;
     public Color fadeColor;
     private Renderer rend;
+
+    private static readonly Vector3 FADE_LOCAL_POSITION = new Vector3(0f, 0f, 0.3f);
 
     private void Awake()
     {
@@ -24,9 +25,19 @@ public class Fade_Screen : MonoBehaviour
         rend = GetComponent<Renderer>();
     }
 
-    void Start()
+    public void AttachToCamera(Camera cam)
     {
-        fadeIn();
+        if (cam == null) return;
+
+        transform.SetParent(cam.transform);
+        transform.localPosition = FADE_LOCAL_POSITION;
+        transform.localRotation = Quaternion.identity;
+    }
+
+    public void DetachFromCamera()
+    {
+        transform.SetParent(null);
+        DontDestroyOnLoad(gameObject);
     }
 
     public void fadeIn()

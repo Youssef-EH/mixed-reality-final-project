@@ -10,6 +10,26 @@ public class SceneSequenceManager : MonoBehaviour
 
     private int currentIndex = 0;
 
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        currentIndex++;
+
+        Fade_Screen.Instance.AttachToCamera(Camera.main);
+
+        // Fade in
+        Fade_Screen.Instance.fadeIn();
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -19,7 +39,6 @@ public class SceneSequenceManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        currentIndex++;
     }
 
     public void NextScene()
@@ -35,13 +54,9 @@ public class SceneSequenceManager : MonoBehaviour
         Fade_Screen.Instance.fadeOut();
         yield return new WaitForSeconds(Fade_Screen.Instance.fadeDuration);
 
+        Fade_Screen.Instance.DetachFromCamera();
+
         // Load next scene
         SceneManager.LoadScene(sceneOrder[currentIndex]);
-        currentIndex++;
-        yield return null; // wait one frame
-
-        // Fade in
-        Fade_Screen.Instance.fadeIn();
-        yield return new WaitForSeconds(Fade_Screen.Instance.fadeDuration);
     }
 }
