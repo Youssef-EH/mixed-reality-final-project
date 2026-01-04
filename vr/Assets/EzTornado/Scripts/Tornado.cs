@@ -92,7 +92,7 @@ public class Tornado : MonoBehaviour
 
             Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
             rb.mass = 2f;
-            rb.drag = 0.5f;
+            rb.linearDamping = 0.5f;
         }
     }
 }
