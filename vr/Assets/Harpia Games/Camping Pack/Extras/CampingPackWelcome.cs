@@ -1,9 +1,6 @@
 using System;
 using UnityEditor;
-
-#if UNITY_EDITOR
 using UnityEngine;
-#endif
 
 namespace Harpia.CampingPack
 {

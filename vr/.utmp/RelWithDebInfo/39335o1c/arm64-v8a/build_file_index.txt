@@ -1,0 +1,2 @@
+C:\Users\daand\Desktop\school\3dejaar\mixed reality\vr\vr\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+C:\Users\daand\Desktop\school\3dejaar\mixed reality\vr\vr\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt
