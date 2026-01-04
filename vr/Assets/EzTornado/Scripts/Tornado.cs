@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -9,6 +11,8 @@ public class Tornado : MonoBehaviour
     public float rotationForce; // Optional, for spinning effect
     public float upward;
 
+    HashSet<Transform> fracturedHouses = new HashSet<Transform>();
+
     private void OnTriggerStay(Collider other)
     {
 
@@ -16,8 +20,12 @@ public class Tornado : MonoBehaviour
         // Ensure the object has a Rigidbody
         if (other.CompareTag("HOUSE"))
         {
-            AddRigidbodiesToChildren(other.transform);
-            return; // we stop here, don't apply tornado forces yet
+            if (!fracturedHouses.Contains(other.transform))
+            {
+                fracturedHouses.Add(other.transform);
+                AddRigidbodiesToChildren(other.transform);
+            }
+            return;
         }
         else if(other.CompareTag("NATUUR"))
         {
@@ -60,17 +68,31 @@ public class Tornado : MonoBehaviour
     {
         foreach (Transform child in houseRoot.GetComponentsInChildren<Transform>())
         {
-            if (child == houseRoot) continue; // skip the root object
+            if (child == houseRoot) continue;
 
-            // Skip if already has RB
+            // Skip tiny debris
+            Renderer r = child.GetComponent<Renderer>();
+            if (r != null && r.bounds.size.magnitude < 0.5f)
+            {
+                Destroy(child.gameObject);
+                continue;
+            }
+
+            // 50% chance to skip
+            if (Random.value < 0.6f)
+            {
+                Destroy(child.gameObject);
+                continue;
+            }
+
             if (child.GetComponent<Rigidbody>() != null)
                 continue;
 
-            // Remove any RBs on parent chain to prevent auto-deletion
             RemoveParentRigidbodies(child);
 
-            child.gameObject.AddComponent<Rigidbody>();
-            Destroy(child.gameObject, 7f);
+            Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
+            rb.mass = 2f;
+            rb.drag = 0.5f;
         }
     }
 }
